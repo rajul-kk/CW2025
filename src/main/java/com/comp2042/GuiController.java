@@ -22,7 +22,6 @@ import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -54,9 +53,6 @@ public class GuiController implements Initializable {
 
     @FXML
     private Label scoreLabel;
-
-    @FXML
-    private Pane nextBlockPane;
 
     private Rectangle[][] displayMatrix;
     
@@ -357,40 +353,6 @@ public class GuiController implements Initializable {
     private void closePauseMenu() {
         if (pauseMenuStage != null && pauseMenuStage.isShowing()) {
             pauseMenuStage.close();
-        }
-    }
-
-    public void drawNextBlock(Block block) {
-        if (nextBlockPane == null) {
-            return;
-        }
-        nextBlockPane.getChildren().clear();
-        if (block == null) {
-            return;
-        }
-        int[][] shape = block.getShape();
-        if (shape.length == 0 || shape[0].length == 0) {
-            return;
-        }
-        double cellSize = BRICK_SIZE;
-        double paneWidth = nextBlockPane.getWidth() > 0 ? nextBlockPane.getWidth() : nextBlockPane.getPrefWidth();
-        double paneHeight = nextBlockPane.getHeight() > 0 ? nextBlockPane.getHeight() : nextBlockPane.getPrefHeight();
-        double startX = Math.max(0, (paneWidth - (shape[0].length * cellSize)) / 2);
-        double startY = Math.max(0, (paneHeight - (shape.length * cellSize)) / 2);
-
-        for (int i = 0; i < shape.length; i++) {
-            for (int j = 0; j < shape[i].length; j++) {
-                int value = shape[i][j];
-                if (value != 0) {
-                    Rectangle rectangle = new Rectangle(cellSize, cellSize);
-                    rectangle.setFill(getFillColor(value));
-                    rectangle.setArcHeight(9);
-                    rectangle.setArcWidth(9);
-                    rectangle.setLayoutX(startX + j * cellSize);
-                    rectangle.setLayoutY(startY + i * cellSize);
-                    nextBlockPane.getChildren().add(rectangle);
-                }
-            }
         }
     }
 

@@ -17,8 +17,6 @@
         <children>
             <Label text="SCORE" styleClass="nextBrickLabel"/>
             <Label fx:id="scoreLabel" text="000000" styleClass="scoreClass"/>
-            <Label text="NEXT" styleClass="nextBrickLabel"/>
-            <Pane fx:id="nextBlockPane" prefWidth="120" prefHeight="120" minWidth="120" minHeight="120" maxWidth="120" maxHeight="120" styleClass="nextBlockPane"/>
         </children>
     </VBox>
 
