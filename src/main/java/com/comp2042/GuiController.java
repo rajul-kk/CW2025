@@ -9,11 +9,24 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
@@ -39,7 +52,15 @@ public class GuiController implements Initializable {
     @FXML
     private GameOverPanel gameOverPanel;
 
+    @FXML
+    private Label scoreLabel;
+
+    @FXML
+    private Pane nextBlockPane;
+
     private Rectangle[][] displayMatrix;
+    
+    private Stage pauseMenuStage;
 
     private InputEventListener eventListener;
 
@@ -79,6 +100,10 @@ public class GuiController implements Initializable {
                 }
                 if (keyEvent.getCode() == KeyCode.N) {
                     newGame(null);
+                }
+                if (keyEvent.getCode() == KeyCode.P || keyEvent.getCode() == KeyCode.SPACE) {
+                    togglePause(null);
+                    keyEvent.consume();
                 }
             }
         });
@@ -201,17 +226,24 @@ public class GuiController implements Initializable {
     }
 
     public void bindScore(IntegerProperty integerProperty) {
+        if (scoreLabel != null && integerProperty != null) {
+            scoreLabel.textProperty().bind(integerProperty.asString());
+        }
     }
 
     public void gameOver() {
         timeLine.stop();
         gameOverPanel.setVisible(true);
+        closePauseMenu();
         isGameOver.setValue(Boolean.TRUE);
+        isPause.setValue(Boolean.FALSE); // Ensure pause is cleared on game over
     }
 
+    @FXML
     public void newGame(ActionEvent actionEvent) {
         timeLine.stop();
         gameOverPanel.setVisible(false);
+        closePauseMenu();
         eventListener.createNewGame();
         gamePanel.requestFocus();
         timeLine.play();
@@ -219,7 +251,203 @@ public class GuiController implements Initializable {
         isGameOver.setValue(Boolean.FALSE);
     }
 
+    @FXML
     public void pauseGame(ActionEvent actionEvent) {
+        togglePause(actionEvent);
+    }
+
+    public void togglePause(ActionEvent actionEvent) {
+        if (isGameOver.getValue()) {
+            return; // Don't allow pausing when game is over
+        }
+        
+        boolean currentlyPaused = isPause.getValue();
+        
+        if (currentlyPaused) {
+            // Resume the game
+            resumeGame();
+        } else {
+            // Pause the game
+            doPause();
+        }
+    }
+    
+    private void doPause() {
+        isPause.setValue(Boolean.TRUE);
+        if (timeLine != null) {
+            timeLine.pause();
+        }
+        showPauseMenu();
+    }
+    
+    private void resumeGame() {
+        isPause.setValue(Boolean.FALSE);
+        if (timeLine != null) {
+            timeLine.play();
+        }
+        closePauseMenu();
         gamePanel.requestFocus();
+    }
+    
+    private void showPauseMenu() {
+        if (pauseMenuStage != null && pauseMenuStage.isShowing()) {
+            return; // Already showing
+        }
+        
+        Stage primaryStage = (Stage) gamePanel.getScene().getWindow();
+        
+        VBox pauseMenu = new VBox(20);
+        pauseMenu.setAlignment(Pos.CENTER);
+        pauseMenu.setPadding(new Insets(30));
+        pauseMenu.setStyle("-fx-background-color: rgba(0, 0, 0, 0.8); -fx-background-radius: 10;");
+        
+        Label pauseTitle = new Label("GAME PAUSED");
+        pauseTitle.setStyle("-fx-font-family: 'Let\'s go Digital'; -fx-font-size: 36px; -fx-text-fill: yellow; -fx-font-weight: bold;");
+        
+        Button resumeButton = new Button("Resume");
+        resumeButton.setStyle("-fx-font-size: 16px; -fx-pref-width: 150px; -fx-pref-height: 35px;");
+        resumeButton.setDefaultButton(true);
+        resumeButton.setOnAction(e -> resumeGame());
+        
+        Button newGameButton = new Button("New Game");
+        newGameButton.setStyle("-fx-font-size: 16px; -fx-pref-width: 150px; -fx-pref-height: 35px;");
+        newGameButton.setOnAction(e -> {
+            closePauseMenu();
+            newGame(null);
+        });
+        
+        Button controlsButton = new Button("Controls");
+        controlsButton.setStyle("-fx-font-size: 16px; -fx-pref-width: 150px; -fx-pref-height: 35px;");
+        controlsButton.setOnAction(e -> {
+            closePauseMenu();
+            showControls(null);
+        });
+        
+        Button exitButton = new Button("Exit");
+        exitButton.setStyle("-fx-font-size: 16px; -fx-pref-width: 150px; -fx-pref-height: 35px;");
+        exitButton.setOnAction(e -> exitGame(null));
+        
+        pauseMenu.getChildren().addAll(pauseTitle, resumeButton, newGameButton, controlsButton, exitButton);
+        
+        Scene pauseScene = new Scene(pauseMenu, 250, 350);
+        pauseScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        
+        // Allow P or ESC to resume the game from the pause menu
+        pauseScene.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.P || e.getCode() == KeyCode.SPACE || e.getCode() == KeyCode.ESCAPE) {
+                resumeGame();
+                e.consume();
+            }
+        });
+        
+        pauseMenuStage = new Stage();
+        pauseMenuStage.initOwner(primaryStage);
+        pauseMenuStage.initModality(Modality.WINDOW_MODAL);
+        pauseMenuStage.initStyle(StageStyle.TRANSPARENT);
+        pauseMenuStage.setScene(pauseScene);
+        
+        // Center the pause menu over the game window
+        pauseMenuStage.setX(primaryStage.getX() + (primaryStage.getWidth() - 250) / 2);
+        pauseMenuStage.setY(primaryStage.getY() + (primaryStage.getHeight() - 350) / 2);
+        
+        pauseMenuStage.show();
+        pauseMenuStage.requestFocus();
+    }
+    
+    private void closePauseMenu() {
+        if (pauseMenuStage != null && pauseMenuStage.isShowing()) {
+            pauseMenuStage.close();
+        }
+    }
+
+    public void drawNextBlock(Block block) {
+        if (nextBlockPane == null) {
+            return;
+        }
+        nextBlockPane.getChildren().clear();
+        if (block == null) {
+            return;
+        }
+        int[][] shape = block.getShape();
+        if (shape.length == 0 || shape[0].length == 0) {
+            return;
+        }
+        double cellSize = BRICK_SIZE;
+        double paneWidth = nextBlockPane.getWidth() > 0 ? nextBlockPane.getWidth() : nextBlockPane.getPrefWidth();
+        double paneHeight = nextBlockPane.getHeight() > 0 ? nextBlockPane.getHeight() : nextBlockPane.getPrefHeight();
+        double startX = Math.max(0, (paneWidth - (shape[0].length * cellSize)) / 2);
+        double startY = Math.max(0, (paneHeight - (shape.length * cellSize)) / 2);
+
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                int value = shape[i][j];
+                if (value != 0) {
+                    Rectangle rectangle = new Rectangle(cellSize, cellSize);
+                    rectangle.setFill(getFillColor(value));
+                    rectangle.setArcHeight(9);
+                    rectangle.setArcWidth(9);
+                    rectangle.setLayoutX(startX + j * cellSize);
+                    rectangle.setLayoutY(startY + i * cellSize);
+                    nextBlockPane.getChildren().add(rectangle);
+                }
+            }
+        }
+    }
+
+    @FXML
+    public void showControls(ActionEvent actionEvent) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Game Controls");
+        alert.setHeaderText("Tetris Controls");
+        
+        String controlsText = 
+            "MOVEMENT:\n" +
+            "  Left Arrow / A  -  Move brick left\n" +
+            "  Right Arrow / D -  Move brick right\n" +
+            "  Down Arrow / S  -  Move brick down (faster)\n" +
+            "  Up Arrow / W    -  Rotate brick\n\n" +
+            "GAME CONTROLS:\n" +
+            "  P / Space       -  Pause/Resume game\n" +
+            "  N               -  New game\n\n" +
+            "MENU SHORTCUTS:\n" +
+            "  Ctrl+N          -  New game\n" +
+            "  Ctrl+Q          -  Exit game";
+        
+        TextArea textArea = new TextArea(controlsText);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setPrefRowCount(12);
+        textArea.setPrefColumnCount(40);
+        textArea.setStyle("-fx-font-family: monospace; -fx-font-size: 12px;");
+        
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10));
+        vbox.getChildren().add(textArea);
+        
+        alert.getDialogPane().setContent(vbox);
+        alert.getDialogPane().setPrefWidth(400);
+        alert.setResizable(true);
+        alert.showAndWait();
+        gamePanel.requestFocus();
+    }
+
+    @FXML
+    public void showAbout(ActionEvent actionEvent) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About TetrisJFX");
+        alert.setHeaderText("TetrisJFX");
+        alert.setContentText(
+            "A classic Tetris game implementation in JavaFX.\n\n" +
+            "Clear rows by completing horizontal lines.\n" +
+            "Score points by clearing multiple rows at once!\n\n" +
+            "Version 1.0"
+        );
+        alert.showAndWait();
+        gamePanel.requestFocus();
+    }
+
+    @FXML
+    public void exitGame(ActionEvent actionEvent) {
+        Platform.exit();
     }
 }

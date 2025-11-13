@@ -6,12 +6,17 @@ public class GameController implements InputEventListener {
 
     private final GuiController viewGuiController;
 
+    @SuppressWarnings("unused")
+    private Block currentBlock;
+    private Block nextBlock;
+
     public GameController(GuiController c) {
         viewGuiController = c;
         board.createNewBrick();
         viewGuiController.setEventListener(this);
         viewGuiController.initGameView(board.getBoardMatrix(), board.getViewData());
         viewGuiController.bindScore(board.getScore().scoreProperty());
+        refreshBlockReferences();
     }
 
     @Override
@@ -24,8 +29,11 @@ public class GameController implements InputEventListener {
             if (clearRow.getLinesRemoved() > 0) {
                 board.getScore().add(clearRow.getScoreBonus());
             }
+            currentBlock = nextBlock;
             if (board.createNewBrick()) {
                 viewGuiController.gameOver();
+            } else {
+                refreshBlockReferences();
             }
 
             viewGuiController.refreshGameBackground(board.getBoardMatrix());
@@ -61,5 +69,21 @@ public class GameController implements InputEventListener {
     public void createNewGame() {
         board.newGame();
         viewGuiController.refreshGameBackground(board.getBoardMatrix());
+        nextBlock = null;
+        refreshBlockReferences();
+    }
+
+    private void refreshBlockReferences() {
+        ViewData viewData = board.getViewData();
+        if (viewData == null) {
+            return;
+        }
+        if (nextBlock == null) {
+            currentBlock = new Block(viewData.getBrickData());
+        } else {
+            currentBlock = nextBlock;
+        }
+        nextBlock = new Block(viewData.getNextBrickData());
+        viewGuiController.drawNextBlock(nextBlock);
     }
 }
