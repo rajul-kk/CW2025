@@ -37,4 +37,13 @@ public class RandomBrickGenerator implements BrickGenerator {
     public Brick getNextBrick() {
         return nextBricks.peek();
     }
+
+    @Override
+    public Brick getSecondNextBrick() {
+        if (nextBricks.size() < 2) {
+            nextBricks.add(brickList.get(ThreadLocalRandom.current().nextInt(brickList.size())));
+        }
+        Object[] bricksArray = nextBricks.toArray();
+        return (Brick) bricksArray[1];
+    }
 }

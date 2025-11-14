@@ -124,4 +124,9 @@ public class SimpleBoard implements Board {
         score.reset();
         createNewBrick();
     }
+
+    @Override
+    public int[][] getSecondNextBrickData() {
+        return brickGenerator.getSecondNextBrick().getShapeMatrix().get(0);
+    }
 }

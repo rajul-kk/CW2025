@@ -22,6 +22,7 @@ import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -53,6 +54,12 @@ public class GuiController implements Initializable {
 
     @FXML
     private Label scoreLabel;
+
+    @FXML
+    private Pane nextBlockPane1;
+
+    @FXML
+    private Pane nextBlockPane2;
 
     private Rectangle[][] displayMatrix;
     
@@ -104,6 +111,7 @@ public class GuiController implements Initializable {
             }
         });
         gameOverPanel.setVisible(false);
+        gameOverPanel.setOnNewGameAction(this::newGame);
 
         final Reflection reflection = new Reflection();
         reflection.setFraction(0.8);
@@ -411,5 +419,55 @@ public class GuiController implements Initializable {
     @FXML
     public void exitGame(ActionEvent actionEvent) {
         Platform.exit();
+    }
+
+    public void drawNextBlock1(Block block) {
+        if (nextBlockPane1 == null || block == null) {
+            return;
+        }
+        nextBlockPane1.getChildren().clear();
+        int[][] shape = block.getShape();
+        int blockSize = 15; // Smaller size for preview
+        int offsetX = (int) (nextBlockPane1.getPrefWidth() - shape[0].length * blockSize) / 2;
+        int offsetY = (int) (nextBlockPane1.getPrefHeight() - shape.length * blockSize) / 2;
+        
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] != 0) {
+                    Rectangle rectangle = new Rectangle(blockSize, blockSize);
+                    rectangle.setFill(getFillColor(shape[i][j]));
+                    rectangle.setArcHeight(5);
+                    rectangle.setArcWidth(5);
+                    rectangle.setLayoutX(offsetX + j * blockSize);
+                    rectangle.setLayoutY(offsetY + i * blockSize);
+                    nextBlockPane1.getChildren().add(rectangle);
+                }
+            }
+        }
+    }
+
+    public void drawNextBlock2(Block block) {
+        if (nextBlockPane2 == null || block == null) {
+            return;
+        }
+        nextBlockPane2.getChildren().clear();
+        int[][] shape = block.getShape();
+        int blockSize = 15; // Smaller size for preview
+        int offsetX = (int) (nextBlockPane2.getPrefWidth() - shape[0].length * blockSize) / 2;
+        int offsetY = (int) (nextBlockPane2.getPrefHeight() - shape.length * blockSize) / 2;
+        
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] != 0) {
+                    Rectangle rectangle = new Rectangle(blockSize, blockSize);
+                    rectangle.setFill(getFillColor(shape[i][j]));
+                    rectangle.setArcHeight(5);
+                    rectangle.setArcWidth(5);
+                    rectangle.setLayoutX(offsetX + j * blockSize);
+                    rectangle.setLayoutY(offsetY + i * blockSize);
+                    nextBlockPane2.getChildren().add(rectangle);
+                }
+            }
+        }
     }
 }

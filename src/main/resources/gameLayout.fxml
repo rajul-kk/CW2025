@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.HBox?>
 <?import java.net.URL?>
 <Pane fx:controller="com.comp2042.GuiController"
       xmlns:fx="http://javafx.com/fxml">
@@ -17,6 +18,11 @@
         <children>
             <Label text="SCORE" styleClass="nextBrickLabel"/>
             <Label fx:id="scoreLabel" text="000000" styleClass="scoreClass"/>
+            <Label text="NEXT" styleClass="nextBrickLabel"/>
+            <HBox spacing="8" alignment="CENTER">
+                <Pane fx:id="nextBlockPane1" prefWidth="80" prefHeight="80" styleClass="nextBlockPane"/>
+                <Pane fx:id="nextBlockPane2" prefWidth="80" prefHeight="80" styleClass="nextBlockPane"/>
+            </HBox>
         </children>
     </VBox>
 
