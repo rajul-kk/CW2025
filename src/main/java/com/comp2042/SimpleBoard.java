@@ -129,4 +129,9 @@ public class SimpleBoard implements Board {
     public int[][] getSecondNextBrickData() {
         return brickGenerator.getSecondNextBrick().getShapeMatrix().get(0);
     }
+
+    @Override
+    public int[][] getThirdNextBrickData() {
+        return brickGenerator.getThirdNextBrick().getShapeMatrix().get(0);
+    }
 }

@@ -18,11 +18,14 @@
         <children>
             <Label text="SCORE" styleClass="nextBrickLabel"/>
             <Label fx:id="scoreLabel" text="000000" styleClass="scoreClass"/>
-            <Label text="NEXT" styleClass="nextBrickLabel"/>
-            <HBox spacing="8" alignment="CENTER">
-                <Pane fx:id="nextBlockPane1" prefWidth="80" prefHeight="80" styleClass="nextBlockPane"/>
-                <Pane fx:id="nextBlockPane2" prefWidth="80" prefHeight="80" styleClass="nextBlockPane"/>
-            </HBox>
+            <Label text="NEXT " styleClass="nextBrickLabel"/>
+            <Pane styleClass="nextBlockContainer">
+                <HBox spacing="8" alignment="CENTER" layoutX="10" layoutY="10">
+                    <Pane fx:id="nextBlockPane1" prefWidth="80" prefHeight="80"/>
+                    <Pane fx:id="nextBlockPane2" prefWidth="80" prefHeight="80"/>
+                    <Pane fx:id="nextBlockPane3" prefWidth="80" prefHeight="80"/>
+                </HBox>
+            </Pane>
         </children>
     </VBox>
 

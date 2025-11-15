@@ -7,4 +7,6 @@ public interface BrickGenerator {
     Brick getNextBrick();
 
     Brick getSecondNextBrick();
+
+    Brick getThirdNextBrick();
 }

@@ -1,6 +1,7 @@
 package com.comp2042;
 
 import javafx.animation.KeyFrame;
+import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -17,7 +18,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -28,8 +28,11 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Paint;
+import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 
@@ -60,6 +63,9 @@ public class GuiController implements Initializable {
 
     @FXML
     private Pane nextBlockPane2;
+
+    @FXML
+    private Pane nextBlockPane3;
 
     private Rectangle[][] displayMatrix;
     
@@ -134,7 +140,17 @@ public class GuiController implements Initializable {
         for (int i = 0; i < brick.getBrickData().length; i++) {
             for (int j = 0; j < brick.getBrickData()[i].length; j++) {
                 Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
-                rectangle.setFill(getFillColor(brick.getBrickData()[i][j]));
+                int colorValue = brick.getBrickData()[i][j];
+                if (colorValue != 0) {
+                    rectangle.setFill(getFillColor(colorValue));
+                    rectangle.setStroke(getBorderColor(colorValue));
+                    rectangle.setStrokeType(StrokeType.INSIDE);
+                    rectangle.setStrokeWidth(1.5);
+                    rectangle.setArcHeight(9);
+                    rectangle.setArcWidth(9);
+                } else {
+                    rectangle.setFill(Color.TRANSPARENT);
+                }
                 rectangles[i][j] = rectangle;
                 brickPanel.add(rectangle, j, i);
             }
@@ -158,31 +174,87 @@ public class GuiController implements Initializable {
                 returnPaint = Color.TRANSPARENT;
                 break;
             case 1:
-                returnPaint = Color.AQUA;
+                // AQUA - Cyan gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(0, 255, 255)),
+                    new Stop(0.3, Color.rgb(0, 200, 255)),
+                    new Stop(0.7, Color.rgb(0, 150, 200)),
+                    new Stop(1.0, Color.rgb(0, 100, 150)));
                 break;
             case 2:
-                returnPaint = Color.BLUEVIOLET;
+                // BLUEVIOLET - Purple gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(138, 43, 226)),
+                    new Stop(0.3, Color.rgb(120, 30, 200)),
+                    new Stop(0.7, Color.rgb(100, 20, 170)),
+                    new Stop(1.0, Color.rgb(80, 10, 140)));
                 break;
             case 3:
-                returnPaint = Color.DARKGREEN;
+                // DARKGREEN - Green gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(0, 200, 0)),
+                    new Stop(0.3, Color.rgb(0, 150, 0)),
+                    new Stop(0.7, Color.rgb(0, 100, 0)),
+                    new Stop(1.0, Color.rgb(0, 60, 0)));
                 break;
             case 4:
-                returnPaint = Color.YELLOW;
+                // YELLOW - Yellow gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(255, 255, 0)),
+                    new Stop(0.3, Color.rgb(255, 220, 0)),
+                    new Stop(0.7, Color.rgb(220, 180, 0)),
+                    new Stop(1.0, Color.rgb(180, 140, 0)));
                 break;
             case 5:
-                returnPaint = Color.RED;
+                // RED - Red gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(255, 0, 0)),
+                    new Stop(0.3, Color.rgb(220, 0, 0)),
+                    new Stop(0.7, Color.rgb(180, 0, 0)),
+                    new Stop(1.0, Color.rgb(140, 0, 0)));
                 break;
             case 6:
-                returnPaint = Color.BEIGE;
+                // BEIGE - Orange gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(255, 200, 150)),
+                    new Stop(0.3, Color.rgb(255, 180, 120)),
+                    new Stop(0.7, Color.rgb(220, 150, 100)),
+                    new Stop(1.0, Color.rgb(180, 120, 80)));
                 break;
             case 7:
-                returnPaint = Color.BURLYWOOD;
+                // BURLYWOOD - Brown gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(222, 184, 135)),
+                    new Stop(0.3, Color.rgb(200, 160, 110)),
+                    new Stop(0.7, Color.rgb(170, 130, 90)),
+                    new Stop(1.0, Color.rgb(140, 100, 70)));
                 break;
             default:
                 returnPaint = Color.WHITE;
                 break;
         }
         return returnPaint;
+    }
+    
+    private Color getBorderColor(int i) {
+        switch (i) {
+            case 1: // AQUA
+                return Color.rgb(150, 255, 255);
+            case 2: // BLUEVIOLET
+                return Color.rgb(180, 100, 255);
+            case 3: // DARKGREEN
+                return Color.rgb(100, 255, 100);
+            case 4: // YELLOW
+                return Color.rgb(255, 255, 150);
+            case 5: // RED
+                return Color.rgb(255, 150, 150);
+            case 6: // BEIGE
+                return Color.rgb(255, 220, 180);
+            case 7: // BURLYWOOD
+                return Color.rgb(240, 200, 160);
+            default:
+                return Color.WHITE;
+        }
     }
 
 
@@ -207,9 +279,17 @@ public class GuiController implements Initializable {
     }
 
     private void setRectangleData(int color, Rectangle rectangle) {
-        rectangle.setFill(getFillColor(color));
-        rectangle.setArcHeight(9);
-        rectangle.setArcWidth(9);
+        if (color == 0) {
+            rectangle.setFill(Color.TRANSPARENT);
+            rectangle.setStroke(null);
+        } else {
+            rectangle.setFill(getFillColor(color));
+            rectangle.setStroke(getBorderColor(color));
+            rectangle.setStrokeType(StrokeType.INSIDE);
+            rectangle.setStrokeWidth(1.5);
+            rectangle.setArcHeight(9);
+            rectangle.setArcWidth(9);
+        }
     }
 
     private void moveDown(MoveEvent event) {
@@ -366,39 +446,156 @@ public class GuiController implements Initializable {
 
     @FXML
     public void showControls(ActionEvent actionEvent) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Game Controls");
-        alert.setHeaderText("Tetris Controls");
+        Stage primaryStage = (Stage) gamePanel.getScene().getWindow();
         
-        String controlsText = 
-            "MOVEMENT:\n" +
-            "  Left Arrow / A  -  Move brick left\n" +
-            "  Right Arrow / D -  Move brick right\n" +
-            "  Down Arrow / S  -  Move brick down (faster)\n" +
-            "  Up Arrow / W    -  Rotate brick\n\n" +
-            "GAME CONTROLS:\n" +
-            "  P / Space       -  Pause/Resume game\n" +
-            "  N               -  New game\n\n" +
-            "MENU SHORTCUTS:\n" +
-            "  Ctrl+N          -  New game\n" +
-            "  Ctrl+Q          -  Exit game";
+        VBox vbox = new VBox(8);
+        vbox.setAlignment(Pos.TOP_CENTER);
+        vbox.setPadding(new Insets(20));
+        vbox.setStyle("-fx-background-color: rgba(0, 0, 0, 0.95); -fx-background-radius: 10;");
         
-        TextArea textArea = new TextArea(controlsText);
-        textArea.setEditable(false);
-        textArea.setWrapText(true);
-        textArea.setPrefRowCount(12);
-        textArea.setPrefColumnCount(40);
-        textArea.setStyle("-fx-font-family: monospace; -fx-font-size: 12px;");
+        // Title
+        Label titleLabel = new Label("GAME CONTROLS");
+        titleLabel.setStyle(
+            "-fx-font-family: 'Let\'s go Digital'; " +
+            "-fx-font-size: 20px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 3, 0.0, 1, 1); " +
+            "-fx-padding: 0 0 10 0;"
+        );
+        titleLabel.setTextFill(Color.YELLOW);
         
-        VBox vbox = new VBox(10);
-        vbox.setPadding(new Insets(10));
-        vbox.getChildren().add(textArea);
+        // Section headers
+        Color sectionHeaderColor = Color.rgb(97, 162, 177); // #61a2b1
+        Label movementHeader = new Label("MOVEMENT:");
+        movementHeader.setStyle(
+            "-fx-font-family: 'Let\'s go Digital'; " +
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-padding: 8 0 4 0;"
+        );
+        movementHeader.setTextFill(sectionHeaderColor);
         
-        alert.getDialogPane().setContent(vbox);
-        alert.getDialogPane().setPrefWidth(400);
-        alert.setResizable(true);
-        alert.showAndWait();
-        gamePanel.requestFocus();
+        Label gameHeader = new Label("GAME CONTROLS:");
+        gameHeader.setStyle(movementHeader.getStyle());
+        gameHeader.setTextFill(sectionHeaderColor);
+        
+        Label menuHeader = new Label("MENU SHORTCUTS:");
+        menuHeader.setStyle(movementHeader.getStyle());
+        menuHeader.setTextFill(sectionHeaderColor);
+        
+        // Control items style - using bright blue for better visibility
+        String controlItemStyle = 
+            "-fx-font-family: 'Let\'s go Digital'; " +
+            "-fx-font-size: 13px; " +
+            "-fx-padding: 2 0;";
+        
+        // Bright cyan/blue color for control items
+        Color brightBlue = Color.rgb(0, 255, 255); // #00FFFF
+        
+        // Movement controls
+        Label leftControl = new Label("  Left Arrow / A  →  Move brick left");
+        leftControl.setStyle(controlItemStyle);
+        leftControl.setTextFill(brightBlue);
+        Label rightControl = new Label("  Right Arrow / D →  Move brick right");
+        rightControl.setStyle(controlItemStyle);
+        rightControl.setTextFill(brightBlue);
+        Label downControl = new Label("  Down Arrow / S  →  Move brick down (faster)");
+        downControl.setStyle(controlItemStyle);
+        downControl.setTextFill(brightBlue);
+        Label rotateControl = new Label("  Up Arrow / W    →  Rotate brick");
+        rotateControl.setStyle(controlItemStyle);
+        rotateControl.setTextFill(brightBlue);
+        
+        // Game controls
+        Label pauseControl = new Label("  P / Space       →  Pause/Resume game");
+        pauseControl.setStyle(controlItemStyle);
+        pauseControl.setTextFill(brightBlue);
+        Label newGameControl = new Label("  N               →  New game");
+        newGameControl.setStyle(controlItemStyle);
+        newGameControl.setTextFill(brightBlue);
+        
+        // Menu shortcuts
+        Label newGameShortcut = new Label("  Ctrl+N          →  New game");
+        newGameShortcut.setStyle(controlItemStyle);
+        newGameShortcut.setTextFill(brightBlue);
+        Label exitShortcut = new Label("  Ctrl+Q          →  Exit game");
+        exitShortcut.setStyle(controlItemStyle);
+        exitShortcut.setTextFill(brightBlue);
+        
+        // Close button
+        Button closeButton = new Button("Close");
+        closeButton.setStyle(
+            "-fx-font-family: 'Let\'s go Digital'; " +
+            "-fx-font-size: 14px; " +
+            "-fx-pref-width: 100px; " +
+            "-fx-pref-height: 30px; " +
+            "-fx-background-color: linear-gradient(#3a3a3a, #1f1f1f); " +
+            "-fx-text-fill: yellow; " +
+            "-fx-background-radius: 8; " +
+            "-fx-border-radius: 8; " +
+            "-fx-border-color: #61a2b1; " +
+            "-fx-border-width: 2px;"
+        );
+        // Check if game is paused before opening controls menu
+        boolean wasPaused = isPause.getValue();
+        
+        closeButton.setOnAction(e -> {
+            Stage stage = (Stage) closeButton.getScene().getWindow();
+            stage.close();
+            // If game was paused when controls opened, resume it when controls close
+            if (wasPaused) {
+                resumeGame();
+            }
+        });
+        
+        vbox.getChildren().addAll(
+            titleLabel,
+            movementHeader,
+            leftControl, rightControl, downControl, rotateControl,
+            gameHeader,
+            pauseControl, newGameControl,
+            menuHeader,
+            newGameShortcut, exitShortcut,
+            new Label(""), // Spacer
+            closeButton
+        );
+        
+        Scene controlsScene = new Scene(vbox, 480, 420);
+        controlsScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        
+        // Allow ESC to close
+        controlsScene.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                Stage stage = (Stage) controlsScene.getWindow();
+                stage.close();
+                // If game was paused when controls opened, resume it when controls close
+                if (wasPaused) {
+                    resumeGame();
+                }
+            }
+        });
+        
+        Stage controlsStage = new Stage();
+        controlsStage.initOwner(primaryStage);
+        controlsStage.initModality(Modality.WINDOW_MODAL);
+        controlsStage.initStyle(StageStyle.TRANSPARENT);
+        controlsStage.setTitle("Game Controls");
+        controlsStage.setScene(controlsScene);
+        
+        // Handle window close event (X button)
+        controlsStage.setOnCloseRequest(e -> {
+            // If game was paused when controls opened, resume it when controls close
+            if (wasPaused) {
+                resumeGame();
+            }
+        });
+        
+        // Center the controls window over the game window
+        controlsStage.setX(primaryStage.getX() + (primaryStage.getWidth() - 480) / 2);
+        controlsStage.setY(primaryStage.getY() + (primaryStage.getHeight() - 420) / 2);
+        
+        controlsStage.show();
+        controlsStage.requestFocus();
     }
 
     @FXML
@@ -436,6 +633,9 @@ public class GuiController implements Initializable {
                 if (shape[i][j] != 0) {
                     Rectangle rectangle = new Rectangle(blockSize, blockSize);
                     rectangle.setFill(getFillColor(shape[i][j]));
+                    rectangle.setStroke(getBorderColor(shape[i][j]));
+                    rectangle.setStrokeType(StrokeType.INSIDE);
+                    rectangle.setStrokeWidth(1.0);
                     rectangle.setArcHeight(5);
                     rectangle.setArcWidth(5);
                     rectangle.setLayoutX(offsetX + j * blockSize);
@@ -461,11 +661,88 @@ public class GuiController implements Initializable {
                 if (shape[i][j] != 0) {
                     Rectangle rectangle = new Rectangle(blockSize, blockSize);
                     rectangle.setFill(getFillColor(shape[i][j]));
+                    rectangle.setStroke(getBorderColor(shape[i][j]));
+                    rectangle.setStrokeType(StrokeType.INSIDE);
+                    rectangle.setStrokeWidth(1.0);
                     rectangle.setArcHeight(5);
                     rectangle.setArcWidth(5);
                     rectangle.setLayoutX(offsetX + j * blockSize);
                     rectangle.setLayoutY(offsetY + i * blockSize);
                     nextBlockPane2.getChildren().add(rectangle);
+                }
+            }
+        }
+    }
+
+    public void drawNextBlock3(Block block) {
+        if (nextBlockPane3 == null || block == null) {
+            return;
+        }
+        nextBlockPane3.getChildren().clear();
+        int[][] shape = block.getShape();
+        int blockSize = 15; // Smaller size for preview
+        int offsetX = (int) (nextBlockPane3.getPrefWidth() - shape[0].length * blockSize) / 2;
+        int offsetY = (int) (nextBlockPane3.getPrefHeight() - shape.length * blockSize) / 2;
+        
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] != 0) {
+                    Rectangle rectangle = new Rectangle(blockSize, blockSize);
+                    rectangle.setFill(getFillColor(shape[i][j]));
+                    rectangle.setStroke(getBorderColor(shape[i][j]));
+                    rectangle.setStrokeType(StrokeType.INSIDE);
+                    rectangle.setStrokeWidth(1.0);
+                    rectangle.setArcHeight(5);
+                    rectangle.setArcWidth(5);
+                    rectangle.setLayoutX(offsetX + j * blockSize);
+                    rectangle.setLayoutY(offsetY + i * blockSize);
+                    nextBlockPane3.getChildren().add(rectangle);
+                }
+            }
+        }
+    }
+
+    /**
+     * Animates the lock effect when a block lands and locks into place.
+     * Creates a pulse animation by scaling the block's rectangles up and back down.
+     * 
+     * @param viewData The ViewData containing the block's position and shape data
+     */
+    public void animateLockBlock(ViewData viewData) {
+        if (viewData == null || displayMatrix == null) {
+            return;
+        }
+
+        int[][] brickData = viewData.getBrickData();
+        int xPos = viewData.getxPosition();
+        int yPos = viewData.getyPosition();
+
+        // Animate each rectangle that is part of the locked block
+        // Note: brickData is indexed as [column][row] based on merge function
+        for (int i = 0; i < brickData.length; i++) {
+            for (int j = 0; j < brickData[i].length; j++) {
+                if (brickData[j][i] != 0) {
+                    // Calculate the board position (matching merge function: targetX = x + i, targetY = y + j)
+                    int boardCol = xPos + i;  // i maps to column (X)
+                    int boardRow = yPos + j;  // j maps to row (Y)
+
+                    // Check bounds and get the corresponding rectangle
+                    if (boardRow >= 2 && boardRow < displayMatrix.length && 
+                        boardCol >= 0 && boardCol < displayMatrix[boardRow].length) {
+                        Rectangle rectangle = displayMatrix[boardRow][boardCol];
+                        
+                        if (rectangle != null) {
+                            // Create a scale transition that pulses the rectangle
+                            ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(150), rectangle);
+                            scaleTransition.setFromX(1.0);
+                            scaleTransition.setFromY(1.0);
+                            scaleTransition.setToX(1.2);
+                            scaleTransition.setToY(1.2);
+                            scaleTransition.setAutoReverse(true);
+                            scaleTransition.setCycleCount(2);
+                            scaleTransition.play();
+                        }
+                    }
                 }
             }
         }

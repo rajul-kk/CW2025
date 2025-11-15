@@ -77,6 +77,16 @@
     -fx-border-radius: 12;
 }
 
+.nextBlockContainer {
+    -fx-background-color: rgba(0, 0, 0, 0.45);
+    -fx-background-radius: 12;
+    -fx-border-color: #61a2b1;
+    -fx-border-width: 2px;
+    -fx-border-radius: 12;
+    -fx-pref-width: 280;
+    -fx-pref-height: 100;
+}
+
 .vbox {
     -fx-spacing: 12;
 }
@@ -95,13 +105,22 @@
 
 .gameOverStyle {
     -fx-font-family: "Let's go Digital";
-    -fx-font-size: 36;
-    -fx-background-color: red;
+    -fx-font-size: 42;
+    -fx-fill: #FF0000;
+    -fx-text-fill: #FF0000;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 6, 0.0, 3, 3),
+                dropshadow(gaussian, rgba(255, 0, 0, 0.8), 4, 0.0, 0, 0),
+                dropshadow(gaussian, rgba(255, 100, 100, 0.6), 2, 0.0, 0, 0);
+    -fx-font-weight: bold;
+    -fx-padding: 10px;
 }
 
 .scoreClass{
     -fx-font-family: "Let's go Digital";
     -fx-font-size: 38;
-    -fx-fill: yellow;
-    -fx-text-fill: yellow;
+    -fx-fill: #FFFF00;
+    -fx-text-fill: #FFFF00;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 4, 0.0, 2, 2),
+                dropshadow(gaussian, rgba(255, 255, 0, 0.6), 2, 0.0, 0, 0);
+    -fx-font-weight: bold;
 }
