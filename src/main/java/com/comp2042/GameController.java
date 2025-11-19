@@ -1,5 +1,7 @@
 package com.comp2042;
 
+import com.comp2042.logic.bricks.Brick;
+
 public class GameController implements InputEventListener {
 
     private Board board = new SimpleBoard(25, 10);
@@ -12,6 +14,10 @@ public class GameController implements InputEventListener {
     private Block nextBlock2;
     private Block nextBlock3;
 
+    private Brick heldBrick;
+    private int heldRotation;
+    private boolean canHold = true;
+
     public GameController(GuiController c) {
         viewGuiController = c;
         board.createNewBrick();
@@ -20,6 +26,9 @@ public class GameController implements InputEventListener {
         viewGuiController.bindScore(board.getScore().scoreProperty());
         refreshBlockReferences();
         initializeNextBlocks();
+        heldBrick = null;
+        heldRotation = 0;
+        canHold = true;
     }
 
     @Override
@@ -44,6 +53,7 @@ public class GameController implements InputEventListener {
             } else {
                 rotateBlockQueue();
                 refreshBlockReferences();
+                canHold = true; // Allow hold again when a block locks and new one appears
             }
 
             viewGuiController.refreshGameBackground(board.getBoardMatrix());
@@ -74,6 +84,41 @@ public class GameController implements InputEventListener {
         return board.getViewData();
     }
 
+    @Override
+    public ViewData onHoldEvent(MoveEvent event) {
+        if (!canHold) {
+            return board.getViewData(); // Already held this turn, return current view
+        }
+
+        SimpleBoard simpleBoard = (SimpleBoard) board;
+        Brick currentBrick = simpleBoard.getCurrentBrick();
+        int currentRotation = simpleBoard.getCurrentRotation();
+
+        if (heldBrick == null) {
+            // First time holding - just store the current brick and get a new one
+            heldBrick = currentBrick;
+            heldRotation = currentRotation;
+            board.createNewBrick();
+            refreshBlockReferences();
+            rotateBlockQueue();
+            canHold = false;
+        } else {
+            // Swap the held brick with the current brick
+            Brick tempBrick = heldBrick;
+            int tempRotation = heldRotation;
+            heldBrick = currentBrick;
+            heldRotation = currentRotation;
+            board.setBrick(tempBrick, tempRotation);
+            refreshBlockReferences();
+            canHold = false;
+        }
+
+        // Update the hold box UI
+        Block holdBlock = new Block(heldBrick.getShapeMatrix().get(heldRotation));
+        viewGuiController.drawHoldBlock(holdBlock);
+
+        return board.getViewData();
+    }
 
     @Override
     public void createNewGame() {
@@ -81,6 +126,10 @@ public class GameController implements InputEventListener {
         viewGuiController.refreshGameBackground(board.getBoardMatrix());
         refreshBlockReferences();
         initializeNextBlocks();
+        heldBrick = null;
+        heldRotation = 0;
+        canHold = true;
+        viewGuiController.drawHoldBlock(null); // Clear hold box
     }
 
     private void refreshBlockReferences() {

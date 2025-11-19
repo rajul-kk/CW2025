@@ -26,5 +26,17 @@ public class BrickRotator {
         currentShape = 0;
     }
 
+    public void setBrick(Brick brick, int rotation) {
+        this.brick = brick;
+        this.currentShape = rotation;
+    }
+
+    public Brick getCurrentBrick() {
+        return brick;
+    }
+
+    public int getCurrentRotation() {
+        return currentShape;
+    }
 
 }

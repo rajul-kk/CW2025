@@ -27,4 +27,6 @@ public interface Board {
     int[][] getSecondNextBrickData();
 
     int[][] getThirdNextBrickData();
+
+    boolean setBrick(com.comp2042.logic.bricks.Brick brick, int rotation);
 }

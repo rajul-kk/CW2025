@@ -50,13 +50,25 @@ public class GuiController implements Initializable {
     private Group groupNotification;
 
     @FXML
+    private javafx.scene.layout.BorderPane gameBoard;
+
+    @FXML
     private GridPane brickPanel;
 
     @FXML
-    private GameOverPanel gameOverPanel;
+    private Label scoreLabel;
 
     @FXML
-    private Label scoreLabel;
+    private VBox gameOverScreen;
+
+    @FXML
+    private Label gameOverLabel;
+
+    @FXML
+    private Button newGameButton;
+
+    @FXML
+    private Button exitButton;
 
     @FXML
     private Pane nextBlockPane1;
@@ -66,6 +78,9 @@ public class GuiController implements Initializable {
 
     @FXML
     private Pane nextBlockPane3;
+
+    @FXML
+    private Pane holdBlockPane;
 
     private Rectangle[][] displayMatrix;
     
@@ -80,6 +95,8 @@ public class GuiController implements Initializable {
     private final BooleanProperty isPause = new SimpleBooleanProperty();
 
     private final BooleanProperty isGameOver = new SimpleBooleanProperty();
+
+    private java.util.List<javafx.scene.Node> currentFallingBlockNodes = new java.util.ArrayList<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -106,18 +123,27 @@ public class GuiController implements Initializable {
                         moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
                         keyEvent.consume();
                     }
+                    if (keyEvent.getCode() == KeyCode.C) {
+                        ViewData viewData = eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER));
+                        if (viewData != null) {
+                            refreshBrick(viewData);
+                        }
+                        keyEvent.consume();
+                    }
                 }
                 if (keyEvent.getCode() == KeyCode.N) {
                     newGame(null);
                 }
-                if (keyEvent.getCode() == KeyCode.P || keyEvent.getCode() == KeyCode.SPACE) {
+                if (keyEvent.getCode() == KeyCode.ESCAPE) {
                     togglePause(null);
                     keyEvent.consume();
                 }
             }
         });
-        gameOverPanel.setVisible(false);
-        gameOverPanel.setOnNewGameAction(this::newGame);
+        if (gameOverScreen != null) {
+            gameOverScreen.setVisible(false);
+            gameOverScreen.setManaged(false);
+        }
 
         final Reflection reflection = new Reflection();
         reflection.setFraction(0.8);
@@ -136,28 +162,9 @@ public class GuiController implements Initializable {
             }
         }
 
+        // Initialize falling block rectangles directly on gamePanel
         rectangles = new Rectangle[brick.getBrickData().length][brick.getBrickData()[0].length];
-        for (int i = 0; i < brick.getBrickData().length; i++) {
-            for (int j = 0; j < brick.getBrickData()[i].length; j++) {
-                Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
-                int colorValue = brick.getBrickData()[i][j];
-                if (colorValue != 0) {
-                    rectangle.setFill(getFillColor(colorValue));
-                    rectangle.setStroke(getBorderColor(colorValue));
-                    rectangle.setStrokeType(StrokeType.INSIDE);
-                    rectangle.setStrokeWidth(1.5);
-                    rectangle.setArcHeight(9);
-                    rectangle.setArcWidth(9);
-                } else {
-                    rectangle.setFill(Color.TRANSPARENT);
-                }
-                rectangles[i][j] = rectangle;
-                brickPanel.add(rectangle, j, i);
-            }
-        }
-        brickPanel.setLayoutX(gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
-        brickPanel.setLayoutY(-42 + gamePanel.getLayoutY() + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
-
+        updateFallingBlock(brick);
 
         timeLine = new Timeline(new KeyFrame(
                 Duration.millis(400),
@@ -260,11 +267,50 @@ public class GuiController implements Initializable {
 
     private void refreshBrick(ViewData brick) {
         if (isPause.getValue() == Boolean.FALSE) {
-            brickPanel.setLayoutX(gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
-            brickPanel.setLayoutY(-42 + gamePanel.getLayoutY() + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
-            for (int i = 0; i < brick.getBrickData().length; i++) {
-                for (int j = 0; j < brick.getBrickData()[i].length; j++) {
-                    setRectangleData(brick.getBrickData()[i][j], rectangles[i][j]);
+            // Remove old rectangles and add new ones at updated positions
+            updateFallingBlock(brick);
+        }
+    }
+
+    private void updateFallingBlock(ViewData brick) {
+        // Remove old falling block rectangles from gamePanel
+        for (javafx.scene.Node node : currentFallingBlockNodes) {
+            gamePanel.getChildren().remove(node);
+        }
+        currentFallingBlockNodes.clear();
+        
+        // Clear the rectangles array
+        rectangles = new Rectangle[brick.getBrickData().length][brick.getBrickData()[0].length];
+        
+        int xPos = brick.getxPosition();
+        int yPos = brick.getyPosition();
+        int[][] brickData = brick.getBrickData();
+        
+        // Create and add new rectangles at correct grid positions
+        for (int i = 0; i < brickData.length; i++) {
+            for (int j = 0; j < brickData[i].length; j++) {
+                if (brickData[i][j] != 0) {
+                    Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                    rectangle.setFill(getFillColor(brickData[i][j]));
+                    rectangle.setStroke(getBorderColor(brickData[i][j]));
+                    rectangle.setStrokeType(StrokeType.INSIDE);
+                    rectangle.setStrokeWidth(1.5);
+                    rectangle.setArcHeight(9);
+                    rectangle.setArcWidth(9);
+                    
+                    rectangles[i][j] = rectangle;
+                    
+                    // Calculate grid position: column = xPos + j, row = yPos + i - 2 (offset for hidden rows)
+                    int gridColumn = xPos + j;
+                    int gridRow = yPos + i - 2; // -2 because board starts at row 2
+                    
+                    // Only add if within visible bounds
+                    if (gridRow >= 0 && gridColumn >= 0 && gridColumn < 10) {
+                        gamePanel.add(rectangle, gridColumn, gridRow);
+                        currentFallingBlockNodes.add(rectangle);
+                    }
+                } else {
+                    rectangles[i][j] = null;
                 }
             }
         }
@@ -297,6 +343,20 @@ public class GuiController implements Initializable {
             DownData downData = eventListener.onDownEvent(event);
             if (downData.getClearRow() != null && downData.getClearRow().getLinesRemoved() > 0) {
                 NotificationPanel notificationPanel = new NotificationPanel("+" + downData.getClearRow().getScoreBonus());
+                
+                // Center the notification over the gameboard
+                if (gameBoard != null && groupNotification != null && groupNotification.getScene() != null) {
+                    // Get the gameboard's bounds in the scene
+                    javafx.geometry.Bounds gameBoardBounds = gameBoard.localToScene(gameBoard.getBoundsInLocal());
+                    // Calculate center position in scene coordinates
+                    double centerXScene = gameBoardBounds.getMinX() + gameBoardBounds.getWidth() / 2 - notificationPanel.getMinWidth() / 2;
+                    double centerYScene = gameBoardBounds.getMinY() + gameBoardBounds.getHeight() / 2 - notificationPanel.getMinHeight() / 2;
+                    // Convert scene coordinates to groupNotification's local coordinates
+                    javafx.geometry.Point2D localPoint = groupNotification.sceneToLocal(centerXScene, centerYScene);
+                    notificationPanel.setLayoutX(localPoint.getX());
+                    notificationPanel.setLayoutY(localPoint.getY());
+                }
+                
                 groupNotification.getChildren().add(notificationPanel);
                 notificationPanel.showScore(groupNotification.getChildren());
             }
@@ -317,16 +377,41 @@ public class GuiController implements Initializable {
 
     public void gameOver() {
         timeLine.stop();
-        gameOverPanel.setVisible(true);
+        showGameOverScreen();
         closePauseMenu();
         isGameOver.setValue(Boolean.TRUE);
         isPause.setValue(Boolean.FALSE); // Ensure pause is cleared on game over
     }
 
+    private void showGameOverScreen() {
+        if (gameOverScreen != null) {
+            gameOverScreen.setVisible(true);
+            gameOverScreen.setManaged(true);
+        }
+    }
+
+    @FXML
+    public void onNewGameButtonClick(ActionEvent actionEvent) {
+        hideGameOverScreen();
+        newGame(actionEvent);
+    }
+
+    @FXML
+    public void onExitButtonClick(ActionEvent actionEvent) {
+        Platform.exit();
+    }
+
+    private void hideGameOverScreen() {
+        if (gameOverScreen != null) {
+            gameOverScreen.setVisible(false);
+            gameOverScreen.setManaged(false);
+        }
+    }
+
     @FXML
     public void newGame(ActionEvent actionEvent) {
         timeLine.stop();
-        gameOverPanel.setVisible(false);
+        hideGameOverScreen();
         closePauseMenu();
         eventListener.createNewGame();
         gamePanel.requestFocus();
@@ -416,9 +501,9 @@ public class GuiController implements Initializable {
         Scene pauseScene = new Scene(pauseMenu, 250, 350);
         pauseScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
         
-        // Allow P or ESC to resume the game from the pause menu
+        // Allow ESC to resume the game from the pause menu
         pauseScene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.P || e.getCode() == KeyCode.SPACE || e.getCode() == KeyCode.ESCAPE) {
+            if (e.getCode() == KeyCode.ESCAPE) {
                 resumeGame();
                 e.consume();
             }
@@ -505,9 +590,12 @@ public class GuiController implements Initializable {
         Label rotateControl = new Label("  Up Arrow / W    →  Rotate brick");
         rotateControl.setStyle(controlItemStyle);
         rotateControl.setTextFill(brightBlue);
+        Label holdControl = new Label("  C                →  Hold/swap brick");
+        holdControl.setStyle(controlItemStyle);
+        holdControl.setTextFill(brightBlue);
         
         // Game controls
-        Label pauseControl = new Label("  P / Space       →  Pause/Resume game");
+        Label pauseControl = new Label("  ESC              →  Pause/Resume game");
         pauseControl.setStyle(controlItemStyle);
         pauseControl.setTextFill(brightBlue);
         Label newGameControl = new Label("  N               →  New game");
@@ -551,7 +639,7 @@ public class GuiController implements Initializable {
         vbox.getChildren().addAll(
             titleLabel,
             movementHeader,
-            leftControl, rightControl, downControl, rotateControl,
+            leftControl, rightControl, downControl, rotateControl, holdControl,
             gameHeader,
             pauseControl, newGameControl,
             menuHeader,
@@ -697,6 +785,37 @@ public class GuiController implements Initializable {
                     rectangle.setLayoutX(offsetX + j * blockSize);
                     rectangle.setLayoutY(offsetY + i * blockSize);
                     nextBlockPane3.getChildren().add(rectangle);
+                }
+            }
+        }
+    }
+
+    public void drawHoldBlock(Block block) {
+        if (holdBlockPane == null) {
+            return;
+        }
+        holdBlockPane.getChildren().clear();
+        if (block == null) {
+            return;
+        }
+        int[][] shape = block.getShape();
+        int blockSize = 15; // Size for preview in hold box
+        int offsetX = (int) (holdBlockPane.getPrefWidth() - shape[0].length * blockSize) / 2;
+        int offsetY = (int) (holdBlockPane.getPrefHeight() - shape.length * blockSize) / 2;
+        
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] != 0) {
+                    Rectangle rectangle = new Rectangle(blockSize, blockSize);
+                    rectangle.setFill(getFillColor(shape[i][j]));
+                    rectangle.setStroke(getBorderColor(shape[i][j]));
+                    rectangle.setStrokeType(StrokeType.INSIDE);
+                    rectangle.setStrokeWidth(1.0);
+                    rectangle.setArcHeight(5);
+                    rectangle.setArcWidth(5);
+                    rectangle.setLayoutX(offsetX + j * blockSize);
+                    rectangle.setLayoutY(offsetY + i * blockSize);
+                    holdBlockPane.getChildren().add(rectangle);
                 }
             }
         }

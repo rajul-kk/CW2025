@@ -134,4 +134,19 @@ public class SimpleBoard implements Board {
     public int[][] getThirdNextBrickData() {
         return brickGenerator.getThirdNextBrick().getShapeMatrix().get(0);
     }
+
+    @Override
+    public boolean setBrick(Brick brick, int rotation) {
+        brickRotator.setBrick(brick, rotation);
+        currentOffset = new Point(4, 2);
+        return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
+    }
+
+    public Brick getCurrentBrick() {
+        return brickRotator.getCurrentBrick();
+    }
+
+    public int getCurrentRotation() {
+        return brickRotator.getCurrentRotation();
+    }
 }
