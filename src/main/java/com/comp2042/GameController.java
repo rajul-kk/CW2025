@@ -170,9 +170,19 @@ public class GameController implements InputEventListener {
     }
 
     public void dropInstant() {
+        // Track the number of rows dropped for scoring
+        int rowsDropped = 0;
+        
         // Keep moving the block down until it hits the bottom/collision
         while (board.moveBrickDown()) {
-            // Continue moving down
+            // Increment counter for each successful move down
+            rowsDropped++;
+        }
+        
+        // Calculate and award drop distance score (2 points per row for Hard Drop)
+        if (rowsDropped > 0) {
+            int dropScore = rowsDropped * 2;
+            board.getScore().add(dropScore);
         }
         
         // Block has hit the bottom, now lock it and spawn next one
@@ -187,6 +197,8 @@ public class GameController implements InputEventListener {
         ClearRow clearRow = board.clearRows();
         if (clearRow.getLinesRemoved() > 0) {
             board.getScore().add(clearRow.getScoreBonus());
+            // Show the score notification popup
+            viewGuiController.showScoreNotification(clearRow);
         }
         if (board.createNewBrick()) {
             viewGuiController.gameOver();

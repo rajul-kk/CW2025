@@ -357,27 +357,33 @@ public class GuiController implements Initializable {
         if (isPause.getValue() == Boolean.FALSE) {
             DownData downData = eventListener.onDownEvent(event);
             if (downData.getClearRow() != null && downData.getClearRow().getLinesRemoved() > 0) {
-                NotificationPanel notificationPanel = new NotificationPanel("+" + downData.getClearRow().getScoreBonus());
-                
-                // Center the notification over the gameboard
-                if (gameBoard != null && groupNotification != null && groupNotification.getScene() != null) {
-                    // Get the gameboard's bounds in the scene
-                    javafx.geometry.Bounds gameBoardBounds = gameBoard.localToScene(gameBoard.getBoundsInLocal());
-                    // Calculate center position in scene coordinates
-                    double centerXScene = gameBoardBounds.getMinX() + gameBoardBounds.getWidth() / 2 - notificationPanel.getMinWidth() / 2;
-                    double centerYScene = gameBoardBounds.getMinY() + gameBoardBounds.getHeight() / 2 - notificationPanel.getMinHeight() / 2;
-                    // Convert scene coordinates to groupNotification's local coordinates
-                    javafx.geometry.Point2D localPoint = groupNotification.sceneToLocal(centerXScene, centerYScene);
-                    notificationPanel.setLayoutX(localPoint.getX());
-                    notificationPanel.setLayoutY(localPoint.getY());
-                }
-                
-                groupNotification.getChildren().add(notificationPanel);
-                notificationPanel.showScore(groupNotification.getChildren());
+                showScoreNotification(downData.getClearRow());
             }
             refreshBrick(downData.getViewData());
         }
         gamePanel.requestFocus();
+    }
+
+    public void showScoreNotification(ClearRow clearRow) {
+        if (clearRow != null && clearRow.getLinesRemoved() > 0) {
+            NotificationPanel notificationPanel = new NotificationPanel("+" + clearRow.getScoreBonus());
+            
+            // Center the notification over the gameboard
+            if (gameBoard != null && groupNotification != null && groupNotification.getScene() != null) {
+                // Get the gameboard's bounds in the scene
+                javafx.geometry.Bounds gameBoardBounds = gameBoard.localToScene(gameBoard.getBoundsInLocal());
+                // Calculate center position in scene coordinates
+                double centerXScene = gameBoardBounds.getMinX() + gameBoardBounds.getWidth() / 2 - notificationPanel.getMinWidth() / 2;
+                double centerYScene = gameBoardBounds.getMinY() + gameBoardBounds.getHeight() / 2 - notificationPanel.getMinHeight() / 2;
+                // Convert scene coordinates to groupNotification's local coordinates
+                javafx.geometry.Point2D localPoint = groupNotification.sceneToLocal(centerXScene, centerYScene);
+                notificationPanel.setLayoutX(localPoint.getX());
+                notificationPanel.setLayoutY(localPoint.getY());
+            }
+            
+            groupNotification.getChildren().add(notificationPanel);
+            notificationPanel.showScore(groupNotification.getChildren());
+        }
     }
 
     public void setEventListener(InputEventListener eventListener) {
@@ -602,6 +608,9 @@ public class GuiController implements Initializable {
         Label downControl = new Label("  Down Arrow / S  →  Move brick down (faster)");
         downControl.setStyle(controlItemStyle);
         downControl.setTextFill(brightBlue);
+        Label hardDropControl = new Label("  Spacebar        →  Hard drop (instant drop)");
+        hardDropControl.setStyle(controlItemStyle);
+        hardDropControl.setTextFill(brightBlue);
         Label rotateControl = new Label("  Up Arrow / W    →  Rotate brick");
         rotateControl.setStyle(controlItemStyle);
         rotateControl.setTextFill(brightBlue);
@@ -654,7 +663,7 @@ public class GuiController implements Initializable {
         vbox.getChildren().addAll(
             titleLabel,
             movementHeader,
-            leftControl, rightControl, downControl, rotateControl, holdControl,
+            leftControl, rightControl, downControl, hardDropControl, rotateControl, holdControl,
             gameHeader,
             pauseControl, newGameControl,
             menuHeader,
@@ -663,7 +672,7 @@ public class GuiController implements Initializable {
             closeButton
         );
         
-        Scene controlsScene = new Scene(vbox, 480, 420);
+        Scene controlsScene = new Scene(vbox, 480, 450);
         controlsScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
         
         // Allow ESC to close
@@ -695,7 +704,7 @@ public class GuiController implements Initializable {
         
         // Center the controls window over the game window
         controlsStage.setX(primaryStage.getX() + (primaryStage.getWidth() - 480) / 2);
-        controlsStage.setY(primaryStage.getY() + (primaryStage.getHeight() - 420) / 2);
+        controlsStage.setY(primaryStage.getY() + (primaryStage.getHeight() - 450) / 2);
         
         controlsStage.show();
         controlsStage.requestFocus();
