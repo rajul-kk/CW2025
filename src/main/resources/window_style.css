@@ -21,10 +21,11 @@
 }
 
 .nextBrickLabel {
-    -fx-font-family: "Let's go Digital";
+    -fx-font-family: "Courier New", "Consolas", "Monaco", monospace;
     -fx-padding: 20px 0 0 0;
     -fx-font-size: 16px;
     -fx-text-fill: yellow;
+    -fx-font-weight: bold;
 }
 
 .ipad-dark-grey {
@@ -141,11 +142,24 @@
 }
 
 .scoreClass{
-    -fx-font-family: "Let's go Digital";
+    -fx-font-family: "Courier New", "Consolas", "Monaco", monospace;
     -fx-font-size: 38;
     -fx-fill: #FFFF00;
     -fx-text-fill: #FFFF00;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 4, 0.0, 2, 2),
                 dropshadow(gaussian, rgba(255, 255, 0, 0.6), 2, 0.0, 0, 0);
     -fx-font-weight: bold;
+}
+
+.arcadeTitle {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 64px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #00FFFF;
+    -fx-effect: dropshadow(gaussian, rgba(0, 255, 255, 1.0), 15, 0.0, 0, 0),
+                dropshadow(gaussian, rgba(0, 255, 255, 0.8), 25, 0.0, 0, 0),
+                dropshadow(gaussian, rgba(255, 255, 0, 0.6), 10, 0.0, 0, 0),
+                dropshadow(gaussian, rgba(0, 0, 0, 1.0), 8, 0.0, 3, 3),
+                dropshadow(gaussian, rgba(0, 0, 0, 0.9), 12, 0.0, 0, 0);
+    -fx-padding: 10px;
 }

@@ -9,8 +9,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.application.Platform;
+import javafx.scene.Parent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -97,6 +99,9 @@ public class GuiController implements Initializable {
     private final BooleanProperty isGameOver = new SimpleBooleanProperty();
 
     private java.util.List<javafx.scene.Node> currentFallingBlockNodes = new java.util.ArrayList<>();
+    
+    private long lastDropTime = 0;
+    private static final long DROP_COOLDOWN = 300; // milliseconds
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -127,6 +132,16 @@ public class GuiController implements Initializable {
                         ViewData viewData = eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER));
                         if (viewData != null) {
                             refreshBrick(viewData);
+                        }
+                        keyEvent.consume();
+                    }
+                    if (keyEvent.getCode() == KeyCode.SPACE) {
+                        long currentTime = System.currentTimeMillis();
+                        if (currentTime - lastDropTime > DROP_COOLDOWN) {
+                            lastDropTime = currentTime;
+                            if (eventListener instanceof GameController) {
+                                ((GameController) eventListener).dropInstant();
+                            }
                         }
                         keyEvent.consume();
                     }
@@ -265,7 +280,7 @@ public class GuiController implements Initializable {
     }
 
 
-    private void refreshBrick(ViewData brick) {
+    public void refreshBrick(ViewData brick) {
         if (isPause.getValue() == Boolean.FALSE) {
             // Remove old rectangles and add new ones at updated positions
             updateFallingBlock(brick);
@@ -398,7 +413,7 @@ public class GuiController implements Initializable {
 
     @FXML
     public void onExitButtonClick(ActionEvent actionEvent) {
-        Platform.exit();
+        returnToMainMenu();
     }
 
     private void hideGameOverScreen() {
@@ -703,7 +718,35 @@ public class GuiController implements Initializable {
 
     @FXML
     public void exitGame(ActionEvent actionEvent) {
-        Platform.exit();
+        returnToMainMenu();
+    }
+    
+    private void returnToMainMenu() {
+        try {
+            // Stop the game timeline if running
+            if (timeLine != null) {
+                timeLine.stop();
+            }
+            
+            // Close pause menu if open
+            closePauseMenu();
+            
+            // Get the current stage
+            Stage stage = (Stage) gamePanel.getScene().getWindow();
+            
+            // Load the main menu
+            URL location = getClass().getClassLoader().getResource("mainMenu.fxml");
+            FXMLLoader fxmlLoader = new FXMLLoader(location);
+            Parent root = fxmlLoader.load();
+            
+            // Create and set the main menu scene
+            Scene menuScene = new Scene(root, 600, 510);
+            stage.setScene(menuScene);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Fallback to exit if menu loading fails
+            Platform.exit();
+        }
     }
 
     public void drawNextBlock1(Block block) {

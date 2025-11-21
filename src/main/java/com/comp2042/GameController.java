@@ -168,4 +168,35 @@ public class GameController implements InputEventListener {
             viewGuiController.drawNextBlock3(nextBlock3);
         }
     }
+
+    public void dropInstant() {
+        // Keep moving the block down until it hits the bottom/collision
+        while (board.moveBrickDown()) {
+            // Continue moving down
+        }
+        
+        // Block has hit the bottom, now lock it and spawn next one
+        // Get the block's position and shape before merging
+        ViewData lockedBlockData = board.getViewData();
+        
+        board.mergeBrickToBackground();
+        
+        // Animate the lock effect
+        viewGuiController.animateLockBlock(lockedBlockData);
+        
+        ClearRow clearRow = board.clearRows();
+        if (clearRow.getLinesRemoved() > 0) {
+            board.getScore().add(clearRow.getScoreBonus());
+        }
+        if (board.createNewBrick()) {
+            viewGuiController.gameOver();
+        } else {
+            rotateBlockQueue();
+            refreshBlockReferences();
+            canHold = true; // Allow hold again when a block locks and new one appears
+        }
+
+        viewGuiController.refreshGameBackground(board.getBoardMatrix());
+        viewGuiController.refreshBrick(board.getViewData());
+    }
 }

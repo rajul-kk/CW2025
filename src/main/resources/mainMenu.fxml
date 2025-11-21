@@ -1,0 +1,39 @@
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Pos?>
+<?import javafx.geometry.Insets?>
+<?import java.net.URL?>
+
+<StackPane fx:controller="com.comp2042.MenuController"
+           xmlns:fx="http://javafx.com/fxml"
+           alignment="CENTER">
+    
+    <children>
+        <VBox spacing="30" alignment="CENTER" styleClass="menu-background"
+              maxWidth="400" maxHeight="350">
+            <padding>
+                <Insets top="40" right="40" bottom="40" left="40"/>
+            </padding>
+            
+            <children>
+                <Label text="TETRIS" styleClass="arcadeTitle"/>
+                
+                <Button fx:id="startButton" text="Start Game" 
+                        styleClass="controlButton" 
+                        prefWidth="200" 
+                        onAction="#onStartButtonClick"/>
+                
+                <Button fx:id="exitButton" text="Exit" 
+                        styleClass="controlButton" 
+                        prefWidth="200" 
+                        onAction="#onExitButtonClick"/>
+            </children>
+        </VBox>
+    </children>
+    
+    <stylesheets>
+        <URL value="@window_style.css"/>
+    </stylesheets>
+</StackPane>
+
