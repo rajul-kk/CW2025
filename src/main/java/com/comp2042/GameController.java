@@ -17,9 +17,16 @@ public class GameController implements InputEventListener {
     private Brick heldBrick;
     private int heldRotation;
     private boolean canHold = true;
+    
+    private int highScore = 0;
 
     public GameController(GuiController c) {
         viewGuiController = c;
+        
+        // Load high score from file on startup
+        highScore = HighScoreManager.loadHighScore();
+        viewGuiController.updateHighScore(highScore);
+        
         board.createNewBrick();
         viewGuiController.setEventListener(this);
         viewGuiController.initGameView(board.getBoardMatrix(), board.getViewData());
@@ -29,6 +36,18 @@ public class GameController implements InputEventListener {
         heldBrick = null;
         heldRotation = 0;
         canHold = true;
+    }
+    
+    /**
+     * Checks if the current score exceeds the high score and updates it if necessary.
+     */
+    private void checkAndUpdateHighScore() {
+        int currentScore = board.getScore().scoreProperty().getValue();
+        if (currentScore > highScore) {
+            highScore = currentScore;
+            viewGuiController.updateHighScore(highScore);
+            HighScoreManager.saveHighScore(highScore);
+        }
     }
 
     @Override
@@ -47,6 +66,7 @@ public class GameController implements InputEventListener {
             clearRow = board.clearRows();
             if (clearRow.getLinesRemoved() > 0) {
                 board.getScore().add(clearRow.getScoreBonus());
+                checkAndUpdateHighScore();
             }
             if (board.createNewBrick()) {
                 viewGuiController.gameOver();
@@ -61,6 +81,7 @@ public class GameController implements InputEventListener {
         } else {
             if (event.getEventSource() == EventSource.USER) {
                 board.getScore().add(1);
+                checkAndUpdateHighScore();
             }
         }
         return new DownData(clearRow, board.getViewData());
@@ -179,10 +200,14 @@ public class GameController implements InputEventListener {
             rowsDropped++;
         }
         
+        // Block has hit the bottom - trigger screen shake effect
+        viewGuiController.shakeBoard();
+        
         // Calculate and award drop distance score (2 points per row for Hard Drop)
         if (rowsDropped > 0) {
             int dropScore = rowsDropped * 2;
             board.getScore().add(dropScore);
+            checkAndUpdateHighScore();
         }
         
         // Block has hit the bottom, now lock it and spawn next one
@@ -197,6 +222,7 @@ public class GameController implements InputEventListener {
         ClearRow clearRow = board.clearRows();
         if (clearRow.getLinesRemoved() > 0) {
             board.getScore().add(clearRow.getScoreBonus());
+            checkAndUpdateHighScore();
             // Show the score notification popup
             viewGuiController.showScoreNotification(clearRow);
         }

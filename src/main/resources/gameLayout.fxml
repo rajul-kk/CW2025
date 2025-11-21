@@ -42,6 +42,10 @@
 
                     </Pane>
 
+                    <Label text="HIGH SCORE" styleClass="nextBrickLabel"/>
+
+                    <Label fx:id="highScoreLabel" text="0" styleClass="scoreClass"/>
+
                 </children>
 
             </VBox>

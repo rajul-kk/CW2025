@@ -61,6 +61,9 @@ public class GuiController implements Initializable {
     private Label scoreLabel;
 
     @FXML
+    private Label highScoreLabel;
+
+    @FXML
     private VBox gameOverScreen;
 
     @FXML
@@ -393,6 +396,12 @@ public class GuiController implements Initializable {
     public void bindScore(IntegerProperty integerProperty) {
         if (scoreLabel != null && integerProperty != null) {
             scoreLabel.textProperty().bind(integerProperty.asString());
+        }
+    }
+
+    public void updateHighScore(int score) {
+        if (highScoreLabel != null) {
+            highScoreLabel.setText(String.valueOf(score));
         }
     }
 
@@ -917,5 +926,54 @@ public class GuiController implements Initializable {
                 }
             }
         }
+    }
+
+    /**
+     * Creates a screen shake effect when a hard drop occurs.
+     * Shakes the game board randomly by small amounts and returns to center.
+     */
+    public void shakeBoard() {
+        if (gameBoard == null) {
+            return;
+        }
+
+        // Create a Timeline with multiple keyframes for the shake effect
+        Timeline shakeTimeline = new Timeline();
+        
+        // Number of shake iterations
+        int shakeCount = 5;
+        Duration totalDuration = Duration.millis(100);
+        Duration frameDuration = Duration.millis(totalDuration.toMillis() / shakeCount);
+        
+        // Random offset range (in pixels)
+        double maxOffset = 3.0;
+        
+        // Store original position
+        double originalX = gameBoard.getTranslateX();
+        double originalY = gameBoard.getTranslateY();
+        
+        // Create keyframes for shake animation
+        for (int i = 0; i <= shakeCount; i++) {
+            final int frame = i;
+            KeyFrame keyFrame = new KeyFrame(
+                frameDuration.multiply(i),
+                e -> {
+                    if (frame == shakeCount) {
+                        // Last frame: return to original position
+                        gameBoard.setTranslateX(originalX);
+                        gameBoard.setTranslateY(originalY);
+                    } else {
+                        // Random shake offset
+                        double offsetX = (Math.random() * 2 - 1) * maxOffset; // -3 to +3
+                        double offsetY = (Math.random() * 2 - 1) * maxOffset; // -3 to +3
+                        gameBoard.setTranslateX(originalX + offsetX);
+                        gameBoard.setTranslateY(originalY + offsetY);
+                    }
+                }
+            );
+            shakeTimeline.getKeyFrames().add(keyFrame);
+        }
+        
+        shakeTimeline.play();
     }
 }
