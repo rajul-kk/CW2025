@@ -50,6 +50,35 @@ public class GameController implements InputEventListener {
         }
     }
 
+    /**
+     * Calculates the Y position where the current block would land (ghost position).
+     * Simulates dropping the block without actually moving it.
+     * @return The Y position where the block would land, or current Y if already at bottom
+     */
+    public int calculateGhostY() {
+        ViewData currentView = board.getViewData();
+        if (currentView == null) {
+            return 0;
+        }
+        
+        int[][] boardMatrix = board.getBoardMatrix();
+        int[][] brickShape = currentView.getBrickData();
+        int currentX = currentView.getxPosition();
+        int currentY = currentView.getyPosition();
+        
+        // Simulate dropping by moving down until collision
+        int ghostY = currentY;
+        while (!MatrixOperations.intersect(boardMatrix, brickShape, currentX, ghostY + 1)) {
+            ghostY++;
+            // Safety check to prevent infinite loop
+            if (ghostY >= boardMatrix.length) {
+                break;
+            }
+        }
+        
+        return ghostY;
+    }
+
     @Override
     public DownData onDownEvent(MoveEvent event) {
         boolean canMove = board.moveBrickDown();

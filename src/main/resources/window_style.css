@@ -10,7 +10,7 @@
 
 .gameBoard {
     -fx-border-color: linear-gradient(#2A5058, #61a2b1);
-    -fx-border-width: 12px;
+    -fx-border-width: 9px;
     -fx-border-radius: 12px;
     -fx-pref-width: 233;
     -fx-pref-height: 506;

@@ -102,6 +102,7 @@ public class GuiController implements Initializable {
     private final BooleanProperty isGameOver = new SimpleBooleanProperty();
 
     private java.util.List<javafx.scene.Node> currentFallingBlockNodes = new java.util.ArrayList<>();
+    private java.util.List<javafx.scene.Node> currentGhostNodes = new java.util.ArrayList<>();
     
     private long lastDropTime = 0;
     private static final long DROP_COOLDOWN = 300; // milliseconds
@@ -287,6 +288,17 @@ public class GuiController implements Initializable {
         if (isPause.getValue() == Boolean.FALSE) {
             // Remove old rectangles and add new ones at updated positions
             updateFallingBlock(brick);
+            
+            // Draw ghost piece showing where block will land
+            if (eventListener instanceof GameController) {
+                GameController gameController = (GameController) eventListener;
+                int ghostY = gameController.calculateGhostY();
+                Block currentBlock = new Block(brick.getBrickData());
+                drawGhost(currentBlock, brick.getxPosition(), ghostY);
+            }
+        } else {
+            // Clear ghost when paused
+            clearGhost();
         }
     }
 
@@ -296,6 +308,9 @@ public class GuiController implements Initializable {
             gamePanel.getChildren().remove(node);
         }
         currentFallingBlockNodes.clear();
+        
+        // Clear ghost when updating falling block
+        clearGhost();
         
         // Clear the rectangles array
         rectangles = new Rectangle[brick.getBrickData().length][brick.getBrickData()[0].length];
@@ -334,7 +349,70 @@ public class GuiController implements Initializable {
         }
     }
 
+    /**
+     * Draws a ghost piece (outline with dotted border) showing where the block will land.
+     * @param block The block shape to draw
+     * @param xPos The X position of the block
+     * @param ghostY The Y position where the ghost should appear (calculated landing position)
+     */
+    public void drawGhost(Block block, int xPos, int ghostY) {
+        // Remove old ghost nodes
+        clearGhost();
+        
+        if (block == null) {
+            return;
+        }
+        
+        int[][] shape = block.getShape();
+        
+        // Create ghost rectangles with dotted outline style
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] != 0) {
+                    Rectangle ghostRect = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                    
+                    // Transparent fill for outline-only style
+                    ghostRect.setFill(Color.TRANSPARENT);
+                    
+                    // Semi-transparent white stroke for visibility
+                    ghostRect.setStroke(Color.color(1, 1, 1, 0.5));
+                    ghostRect.setStrokeType(StrokeType.INSIDE);
+                    ghostRect.setStrokeWidth(2);
+                    
+                    // Apply dotted pattern to the stroke
+                    ghostRect.getStrokeDashArray().addAll(5d, 5d);
+                    
+                    ghostRect.setArcHeight(9);
+                    ghostRect.setArcWidth(9);
+                    
+                    // Calculate grid position: column = xPos + j, row = ghostY + i - 2 (offset for hidden rows)
+                    int gridColumn = xPos + j;
+                    int gridRow = ghostY + i - 2; // -2 because board starts at row 2
+                    
+                    // Only add if within visible bounds
+                    if (gridRow >= 0 && gridColumn >= 0 && gridColumn < 10) {
+                        gamePanel.add(ghostRect, gridColumn, gridRow);
+                        currentGhostNodes.add(ghostRect);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Clears the ghost piece from the display.
+     */
+    private void clearGhost() {
+        for (javafx.scene.Node node : currentGhostNodes) {
+            gamePanel.getChildren().remove(node);
+        }
+        currentGhostNodes.clear();
+    }
+
     public void refreshGameBackground(int[][] board) {
+        // Clear ghost when background refreshes (block locked)
+        clearGhost();
+        
         for (int i = 2; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 setRectangleData(board[i][j], displayMatrix[i][j]);
