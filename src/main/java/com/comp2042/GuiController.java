@@ -845,119 +845,68 @@ public class GuiController implements Initializable {
         }
     }
 
-    public void drawNextBlock1(Block block) {
-        if (nextBlockPane1 == null || block == null) {
-            return;
-        }
-        nextBlockPane1.getChildren().clear();
-        int[][] shape = block.getShape();
-        int blockSize = 15; // Smaller size for preview
-        int offsetX = (int) (nextBlockPane1.getPrefWidth() - shape[0].length * blockSize) / 2;
-        int offsetY = (int) (nextBlockPane1.getPrefHeight() - shape.length * blockSize) / 2;
-        
-        for (int i = 0; i < shape.length; i++) {
-            for (int j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] != 0) {
-                    Rectangle rectangle = new Rectangle(blockSize, blockSize);
-                    rectangle.setFill(getFillColor(shape[i][j]));
-                    rectangle.setStroke(getBorderColor(shape[i][j]));
-                    rectangle.setStrokeType(StrokeType.INSIDE);
-                    rectangle.setStrokeWidth(1.0);
-                    rectangle.setArcHeight(5);
-                    rectangle.setArcWidth(5);
-                    rectangle.setLayoutX(offsetX + j * blockSize);
-                    rectangle.setLayoutY(offsetY + i * blockSize);
-                    nextBlockPane1.getChildren().add(rectangle);
-                }
-            }
-        }
+    /**
+     * Helper method to create a preview rectangle with consistent styling.
+     * @param color The color code for the block
+     * @param size The size of the rectangle
+     * @return A styled Rectangle ready for display
+     */
+    private Rectangle createPreviewRectangle(int color, int size) {
+        Rectangle rectangle = new Rectangle(size, size);
+        rectangle.setFill(getFillColor(color));
+        rectangle.setStroke(getBorderColor(color));
+        rectangle.setStrokeType(StrokeType.INSIDE);
+        rectangle.setStrokeWidth(1.0);
+        rectangle.setArcHeight(5);
+        rectangle.setArcWidth(5);
+        return rectangle;
     }
 
-    public void drawNextBlock2(Block block) {
-        if (nextBlockPane2 == null || block == null) {
+    /**
+     * Draws a block in the specified pane. Handles centering and styling.
+     * @param block The block to draw, or null to clear the pane
+     * @param pane The pane to draw in
+     */
+    private void drawBlockInPane(Block block, Pane pane) {
+        if (pane == null) {
             return;
         }
-        nextBlockPane2.getChildren().clear();
-        int[][] shape = block.getShape();
-        int blockSize = 15; // Smaller size for preview
-        int offsetX = (int) (nextBlockPane2.getPrefWidth() - shape[0].length * blockSize) / 2;
-        int offsetY = (int) (nextBlockPane2.getPrefHeight() - shape.length * blockSize) / 2;
-        
-        for (int i = 0; i < shape.length; i++) {
-            for (int j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] != 0) {
-                    Rectangle rectangle = new Rectangle(blockSize, blockSize);
-                    rectangle.setFill(getFillColor(shape[i][j]));
-                    rectangle.setStroke(getBorderColor(shape[i][j]));
-                    rectangle.setStrokeType(StrokeType.INSIDE);
-                    rectangle.setStrokeWidth(1.0);
-                    rectangle.setArcHeight(5);
-                    rectangle.setArcWidth(5);
-                    rectangle.setLayoutX(offsetX + j * blockSize);
-                    rectangle.setLayoutY(offsetY + i * blockSize);
-                    nextBlockPane2.getChildren().add(rectangle);
-                }
-            }
-        }
-    }
-
-    public void drawNextBlock3(Block block) {
-        if (nextBlockPane3 == null || block == null) {
-            return;
-        }
-        nextBlockPane3.getChildren().clear();
-        int[][] shape = block.getShape();
-        int blockSize = 15; // Smaller size for preview
-        int offsetX = (int) (nextBlockPane3.getPrefWidth() - shape[0].length * blockSize) / 2;
-        int offsetY = (int) (nextBlockPane3.getPrefHeight() - shape.length * blockSize) / 2;
-        
-        for (int i = 0; i < shape.length; i++) {
-            for (int j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] != 0) {
-                    Rectangle rectangle = new Rectangle(blockSize, blockSize);
-                    rectangle.setFill(getFillColor(shape[i][j]));
-                    rectangle.setStroke(getBorderColor(shape[i][j]));
-                    rectangle.setStrokeType(StrokeType.INSIDE);
-                    rectangle.setStrokeWidth(1.0);
-                    rectangle.setArcHeight(5);
-                    rectangle.setArcWidth(5);
-                    rectangle.setLayoutX(offsetX + j * blockSize);
-                    rectangle.setLayoutY(offsetY + i * blockSize);
-                    nextBlockPane3.getChildren().add(rectangle);
-                }
-            }
-        }
-    }
-
-    public void drawHoldBlock(Block block) {
-        if (holdBlockPane == null) {
-            return;
-        }
-        holdBlockPane.getChildren().clear();
+        pane.getChildren().clear();
         if (block == null) {
             return;
         }
+        
         int[][] shape = block.getShape();
-        int blockSize = 15; // Size for preview in hold box
-        int offsetX = (int) (holdBlockPane.getPrefWidth() - shape[0].length * blockSize) / 2;
-        int offsetY = (int) (holdBlockPane.getPrefHeight() - shape.length * blockSize) / 2;
+        int blockSize = 15; // Size for preview blocks
+        int offsetX = (int) (pane.getPrefWidth() - shape[0].length * blockSize) / 2;
+        int offsetY = (int) (pane.getPrefHeight() - shape.length * blockSize) / 2;
         
         for (int i = 0; i < shape.length; i++) {
             for (int j = 0; j < shape[i].length; j++) {
                 if (shape[i][j] != 0) {
-                    Rectangle rectangle = new Rectangle(blockSize, blockSize);
-                    rectangle.setFill(getFillColor(shape[i][j]));
-                    rectangle.setStroke(getBorderColor(shape[i][j]));
-                    rectangle.setStrokeType(StrokeType.INSIDE);
-                    rectangle.setStrokeWidth(1.0);
-                    rectangle.setArcHeight(5);
-                    rectangle.setArcWidth(5);
+                    Rectangle rectangle = createPreviewRectangle(shape[i][j], blockSize);
                     rectangle.setLayoutX(offsetX + j * blockSize);
                     rectangle.setLayoutY(offsetY + i * blockSize);
-                    holdBlockPane.getChildren().add(rectangle);
+                    pane.getChildren().add(rectangle);
                 }
             }
         }
+    }
+
+    public void drawNextBlock1(Block block) {
+        drawBlockInPane(block, nextBlockPane1);
+    }
+
+    public void drawNextBlock2(Block block) {
+        drawBlockInPane(block, nextBlockPane2);
+    }
+
+    public void drawNextBlock3(Block block) {
+        drawBlockInPane(block, nextBlockPane3);
+    }
+
+    public void drawHoldBlock(Block block) {
+        drawBlockInPane(block, holdBlockPane);
     }
 
     /**
