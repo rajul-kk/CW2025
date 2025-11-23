@@ -35,7 +35,16 @@ public class MenuController {
             stage.setScene(gameScene);
             
             // Initialize the game controller
-            new GameController(guiController);
+            GameController gameController = new GameController(guiController);
+            
+            // Set up input handler for keyboard input
+            // The InputHandler constructor automatically sets up key listeners
+            new InputHandler(gameScene, gameController, guiController);
+            
+            // Set up layout manager for responsive resizing (if needed)
+            // LayoutManager layoutManager = new LayoutManager(gameScene);
+            // Example: layoutManager.bindWidth(somePane, 0.8);
+            
         } catch (Exception e) {
             e.printStackTrace();
         }

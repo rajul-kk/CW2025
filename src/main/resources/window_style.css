@@ -163,3 +163,73 @@
                 dropshadow(gaussian, rgba(0, 0, 0, 0.9), 12, 0.0, 0, 0);
     -fx-padding: 10px;
 }
+
+/* Pause Menu Styles */
+.pause-menu {
+    -fx-background-color: rgba(0, 0, 0, 0.8);
+    -fx-background-radius: 10;
+}
+
+.pause-title {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 24px;
+    -fx-text-fill: yellow;
+    -fx-font-weight: bold;
+}
+
+.pause-menu-button {
+    -fx-font-size: 16px;
+    -fx-pref-width: 150px;
+    -fx-pref-height: 35px;
+}
+
+/* Controls Dialog Styles */
+.controls-dialog {
+    -fx-background-color: rgba(0, 0, 0, 0.95);
+    -fx-background-radius: 10;
+}
+
+.controls-title {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 3, 0.0, 1, 1);
+    -fx-padding: 0 0 10 0;
+    -fx-text-fill: yellow;
+}
+
+.controls-section-header {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 0 4 0;
+    -fx-text-fill: #61a2b1;
+}
+
+.controls-item {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 12px;
+    -fx-padding: 1 0;
+    -fx-text-fill: #00FFFF;
+}
+
+.controls-close-button {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 14px;
+    -fx-pref-width: 100px;
+    -fx-pref-height: 30px;
+    -fx-background-color: linear-gradient(#3a3a3a, #1f1f1f);
+    -fx-text-fill: yellow;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #61a2b1;
+    -fx-border-width: 2px;
+}
+
+.controls-close-button:hover {
+    -fx-background-color: linear-gradient(#505050, #2a2a2a);
+}
+
+.controls-close-button:pressed {
+    -fx-background-color: linear-gradient(#2a2a2a, #121212);
+}

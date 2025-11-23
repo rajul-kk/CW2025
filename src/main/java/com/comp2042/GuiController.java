@@ -20,7 +20,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -40,7 +39,9 @@ import java.util.ResourceBundle;
 public class GuiController implements Initializable {
 
     private static final int BRICK_SIZE = 20;
-    private static final String BUTTON_STYLE = "-fx-font-size: 16px; -fx-pref-width: 150px; -fx-pref-height: 35px;";
+    private static final String CSS_CONTROLS_ITEM = "controls-item";
+    private static final String CSS_CONTROLS_SECTION_HEADER = "controls-section-header";
+    private static final String CSS_PAUSE_MENU_BUTTON = "pause-menu-button";
 
     @FXML
     private GridPane gamePanel;
@@ -102,145 +103,34 @@ public class GuiController implements Initializable {
 
     private java.util.List<javafx.scene.Node> currentFallingBlockNodes = new java.util.ArrayList<>();
     private java.util.List<javafx.scene.Node> currentGhostNodes = new java.util.ArrayList<>();
-    
-    private long lastDropTime = 0;
-    private static final long DROP_COOLDOWN = 300; // milliseconds
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Font.loadFont(getClass().getClassLoader().getResource("digital.ttf").toExternalForm(), 38);
         gamePanel.setFocusTraversable(true);
         gamePanel.requestFocus();
-        gamePanel.setOnKeyPressed(this::handleKeyPressed);
         if (gameOverScreen != null) {
             gameOverScreen.setVisible(false);
             gameOverScreen.setManaged(false);
         }
     }
-
-    private void handleKeyPressed(KeyEvent e) {
-        KeyCode code = e.getCode();
-        boolean gameActive = !isPause.getValue() && !isGameOver.getValue();
-        
-        if (gameActive && handleGameActiveKeys(code, e)) {
-            return;
-        }
-        
-        handleMenuKeys(code, e);
+    
+    /**
+     * Checks if the game is currently paused.
+     * @return true if paused, false otherwise
+     */
+    public boolean isPaused() {
+        return isPause.get();
+    }
+    
+    /**
+     * Checks if the game is over.
+     * @return true if game over, false otherwise
+     */
+    public boolean isGameOver() {
+        return isGameOver.get();
     }
 
-    private boolean handleGameActiveKeys(KeyCode code, KeyEvent e) {
-        if (isMovementKey(code)) {
-            return handleMovementKey(code, e);
-        }
-        
-        if (code == KeyCode.C) {
-            handleHoldKey(e);
-            return true;
-        }
-        
-        if (code == KeyCode.SPACE) {
-            handleHardDropKey();
-            e.consume();
-            return true;
-        }
-        
-        return false;
-    }
-
-    private boolean isMovementKey(KeyCode code) {
-        return code == KeyCode.LEFT || code == KeyCode.A ||
-               code == KeyCode.RIGHT || code == KeyCode.D ||
-               code == KeyCode.UP || code == KeyCode.W ||
-               code == KeyCode.DOWN || code == KeyCode.S;
-    }
-
-    private boolean handleMovementKey(KeyCode code, KeyEvent e) {
-        if (isLeftKey(code)) {
-            handleLeftMovement(e);
-            return true;
-        }
-        
-        if (isRightKey(code)) {
-            handleRightMovement(e);
-            return true;
-        }
-        
-        if (isUpKey(code)) {
-            handleRotateMovement(e);
-            return true;
-        }
-        
-        if (isDownKey(code)) {
-            handleDownMovement(e);
-            return true;
-        }
-        
-        return false;
-    }
-
-    private boolean isLeftKey(KeyCode code) {
-        return code == KeyCode.LEFT || code == KeyCode.A;
-    }
-
-    private boolean isRightKey(KeyCode code) {
-        return code == KeyCode.RIGHT || code == KeyCode.D;
-    }
-
-    private boolean isUpKey(KeyCode code) {
-        return code == KeyCode.UP || code == KeyCode.W;
-    }
-
-    private boolean isDownKey(KeyCode code) {
-        return code == KeyCode.DOWN || code == KeyCode.S;
-    }
-
-    private void handleLeftMovement(KeyEvent e) {
-        refreshBrick(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
-        e.consume();
-    }
-
-    private void handleRightMovement(KeyEvent e) {
-        refreshBrick(eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER)));
-        e.consume();
-    }
-
-    private void handleRotateMovement(KeyEvent e) {
-        refreshBrick(eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER)));
-        e.consume();
-    }
-
-    private void handleDownMovement(KeyEvent e) {
-        moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
-        e.consume();
-    }
-
-    private void handleHoldKey(KeyEvent e) {
-        ViewData viewData = eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER));
-        if (viewData != null) {
-            refreshBrick(viewData);
-        }
-        e.consume();
-    }
-
-    private void handleHardDropKey() {
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastDropTime > DROP_COOLDOWN) {
-            lastDropTime = currentTime;
-            if (eventListener instanceof GameController gameController) {
-                gameController.dropInstant();
-            }
-        }
-    }
-
-    private void handleMenuKeys(KeyCode code, KeyEvent e) {
-        if (code == KeyCode.N) {
-            newGame(null);
-        } else if (code == KeyCode.ESCAPE) {
-            togglePause();
-            e.consume();
-        }
-    }
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
         displayMatrix = new Rectangle[boardMatrix.length][boardMatrix[0].length];
@@ -274,6 +164,13 @@ public class GuiController implements Initializable {
 
 
     public void refreshBrick(ViewData brick) {
+        if (brick == null) {
+            // Clear falling block and ghost if no brick data (e.g., game over)
+            clearFallingBlock();
+            clearGhost();
+            return;
+        }
+        
         if (isPause.getValue() == Boolean.FALSE) {
             // Remove old rectangles and add new ones at updated positions
             updateFallingBlock(brick);
@@ -288,6 +185,13 @@ public class GuiController implements Initializable {
             // Clear ghost when paused
             clearGhost();
         }
+    }
+    
+    private void clearFallingBlock() {
+        for (javafx.scene.Node node : currentFallingBlockNodes) {
+            gamePanel.getChildren().remove(node);
+        }
+        currentFallingBlockNodes.clear();
     }
 
     private void updateFallingBlock(ViewData brick) {
@@ -365,7 +269,11 @@ public class GuiController implements Initializable {
         }
     }
 
-    private void moveDown(MoveEvent event) {
+    /**
+     * Handles the automatic down movement from the game timeline.
+     * This is called by the game loop, not by user input.
+     */
+    void moveDown(MoveEvent event) {
         if (isPause.getValue() == Boolean.FALSE) {
             DownData downData = eventListener.onDownEvent(event);
             if (downData.getClearRow() != null && downData.getClearRow().getLinesRemoved() > 0) {
@@ -509,38 +417,39 @@ public class GuiController implements Initializable {
         VBox pauseMenu = new VBox(20);
         pauseMenu.setAlignment(Pos.CENTER);
         pauseMenu.setPadding(new Insets(30));
-        pauseMenu.setStyle("-fx-background-color: rgba(0, 0, 0, 0.8); -fx-background-radius: 10;");
+        pauseMenu.getStyleClass().add("pause-menu");
         
         Label pauseTitle = new Label("GAME PAUSED");
-        pauseTitle.setStyle("-fx-font-family: 'Let\'s go Digital'; -fx-font-size: 36px; -fx-text-fill: yellow; -fx-font-weight: bold;");
+        pauseTitle.getStyleClass().add("pause-title");
         
         Button resumeButton = new Button("Resume");
-        resumeButton.setStyle(BUTTON_STYLE);
+        resumeButton.getStyleClass().add(CSS_PAUSE_MENU_BUTTON);
         resumeButton.setDefaultButton(true);
         resumeButton.setOnAction(e -> resumeGame());
         
         Button pauseNewGameButton = new Button("New Game");
-        pauseNewGameButton.setStyle(BUTTON_STYLE);
+        pauseNewGameButton.getStyleClass().add(CSS_PAUSE_MENU_BUTTON);
         pauseNewGameButton.setOnAction(e -> {
             closePauseMenu();
             newGame(null);
         });
         
         Button controlsButton = new Button("Controls");
-        controlsButton.setStyle(BUTTON_STYLE);
+        controlsButton.getStyleClass().add(CSS_PAUSE_MENU_BUTTON);
         controlsButton.setOnAction(e -> {
             closePauseMenu();
             showControls(null);
         });
         
         Button pauseExitButton = new Button("Exit");
-        pauseExitButton.setStyle(BUTTON_STYLE);
+        pauseExitButton.getStyleClass().add(CSS_PAUSE_MENU_BUTTON);
         pauseExitButton.setOnAction(e -> exitGame(null));
         
         pauseMenu.getChildren().addAll(pauseTitle, resumeButton, pauseNewGameButton, controlsButton, pauseExitButton);
         
         Scene pauseScene = new Scene(pauseMenu, 250, 350);
         pauseScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        pauseScene.getStylesheets().add(getClass().getClassLoader().getResource("window_style.css").toExternalForm());
         
         // Allow ESC to resume the game from the pause menu
         pauseScene.setOnKeyPressed(e -> {
@@ -574,100 +483,54 @@ public class GuiController implements Initializable {
     public void showControls(ActionEvent actionEvent) {
         Stage primaryStage = (Stage) gamePanel.getScene().getWindow();
         
-        VBox vbox = new VBox(8);
+        VBox vbox = new VBox(6);
         vbox.setAlignment(Pos.TOP_CENTER);
-        vbox.setPadding(new Insets(20));
-        vbox.setStyle("-fx-background-color: rgba(0, 0, 0, 0.95); -fx-background-radius: 10;");
+        vbox.setPadding(new Insets(15));
+        vbox.getStyleClass().add("controls-dialog");
         
         // Title
         Label titleLabel = new Label("GAME CONTROLS");
-        titleLabel.setStyle(
-            "-fx-font-family: 'Let\'s go Digital'; " +
-            "-fx-font-size: 20px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 3, 0.0, 1, 1); " +
-            "-fx-padding: 0 0 10 0;"
-        );
-        titleLabel.setTextFill(Color.YELLOW);
+        titleLabel.getStyleClass().add("controls-title");
         
         // Section headers
-        Color sectionHeaderColor = Color.rgb(97, 162, 177); // #61a2b1
         Label movementHeader = new Label("MOVEMENT:");
-        movementHeader.setStyle(
-            "-fx-font-family: 'Let\'s go Digital'; " +
-            "-fx-font-size: 14px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-padding: 8 0 4 0;"
-        );
-        movementHeader.setTextFill(sectionHeaderColor);
+        movementHeader.getStyleClass().add(CSS_CONTROLS_SECTION_HEADER);
         
         Label gameHeader = new Label("GAME CONTROLS:");
-        gameHeader.setStyle(movementHeader.getStyle());
-        gameHeader.setTextFill(sectionHeaderColor);
+        gameHeader.getStyleClass().add(CSS_CONTROLS_SECTION_HEADER);
         
         Label menuHeader = new Label("MENU SHORTCUTS:");
-        menuHeader.setStyle(movementHeader.getStyle());
-        menuHeader.setTextFill(sectionHeaderColor);
-        
-        // Control items style - using bright blue for better visibility
-        String controlItemStyle = 
-            "-fx-font-family: 'Let\'s go Digital'; " +
-            "-fx-font-size: 13px; " +
-            "-fx-padding: 2 0;";
-        
-        // Bright cyan/blue color for control items
-        Color brightBlue = Color.rgb(0, 255, 255); // #00FFFF
+        menuHeader.getStyleClass().add(CSS_CONTROLS_SECTION_HEADER);
         
         // Movement controls
         Label leftControl = new Label("  Left Arrow / A  →  Move brick left");
-        leftControl.setStyle(controlItemStyle);
-        leftControl.setTextFill(brightBlue);
+        leftControl.getStyleClass().add(CSS_CONTROLS_ITEM);
         Label rightControl = new Label("  Right Arrow / D →  Move brick right");
-        rightControl.setStyle(controlItemStyle);
-        rightControl.setTextFill(brightBlue);
+        rightControl.getStyleClass().add(CSS_CONTROLS_ITEM);
         Label downControl = new Label("  Down Arrow / S  →  Move brick down (faster)");
-        downControl.setStyle(controlItemStyle);
-        downControl.setTextFill(brightBlue);
+        downControl.getStyleClass().add(CSS_CONTROLS_ITEM);
         Label hardDropControl = new Label("  Spacebar        →  Hard drop (instant drop)");
-        hardDropControl.setStyle(controlItemStyle);
-        hardDropControl.setTextFill(brightBlue);
+        hardDropControl.getStyleClass().add(CSS_CONTROLS_ITEM);
         Label rotateControl = new Label("  Up Arrow / W    →  Rotate brick");
-        rotateControl.setStyle(controlItemStyle);
-        rotateControl.setTextFill(brightBlue);
+        rotateControl.getStyleClass().add(CSS_CONTROLS_ITEM);
         Label holdControl = new Label("  C                →  Hold/swap brick");
-        holdControl.setStyle(controlItemStyle);
-        holdControl.setTextFill(brightBlue);
+        holdControl.getStyleClass().add(CSS_CONTROLS_ITEM);
         
         // Game controls
         Label pauseControl = new Label("  ESC              →  Pause/Resume game");
-        pauseControl.setStyle(controlItemStyle);
-        pauseControl.setTextFill(brightBlue);
+        pauseControl.getStyleClass().add(CSS_CONTROLS_ITEM);
         Label newGameControl = new Label("  N               →  New game");
-        newGameControl.setStyle(controlItemStyle);
-        newGameControl.setTextFill(brightBlue);
+        newGameControl.getStyleClass().add(CSS_CONTROLS_ITEM);
         
         // Menu shortcuts
         Label newGameShortcut = new Label("  Ctrl+N          →  New game");
-        newGameShortcut.setStyle(controlItemStyle);
-        newGameShortcut.setTextFill(brightBlue);
+        newGameShortcut.getStyleClass().add(CSS_CONTROLS_ITEM);
         Label exitShortcut = new Label("  Ctrl+Q          →  Exit game");
-        exitShortcut.setStyle(controlItemStyle);
-        exitShortcut.setTextFill(brightBlue);
+        exitShortcut.getStyleClass().add(CSS_CONTROLS_ITEM);
         
         // Close button
         Button closeButton = new Button("Close");
-        closeButton.setStyle(
-            "-fx-font-family: 'Let\'s go Digital'; " +
-            "-fx-font-size: 14px; " +
-            "-fx-pref-width: 100px; " +
-            "-fx-pref-height: 30px; " +
-            "-fx-background-color: linear-gradient(#3a3a3a, #1f1f1f); " +
-            "-fx-text-fill: yellow; " +
-            "-fx-background-radius: 8; " +
-            "-fx-border-radius: 8; " +
-            "-fx-border-color: #61a2b1; " +
-            "-fx-border-width: 2px;"
-        );
+        closeButton.getStyleClass().add("controls-close-button");
         // Check if game is paused before opening controls menu
         boolean wasPaused = isPause.getValue();
         
@@ -692,8 +555,9 @@ public class GuiController implements Initializable {
             closeButton
         );
         
-        Scene controlsScene = new Scene(vbox, 480, 450);
+        Scene controlsScene = new Scene(vbox, 480, 520);
         controlsScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        controlsScene.getStylesheets().add(getClass().getClassLoader().getResource("window_style.css").toExternalForm());
         
         // Allow ESC to close
         controlsScene.setOnKeyPressed(e -> {
@@ -724,7 +588,7 @@ public class GuiController implements Initializable {
         
         // Center the controls window over the game window
         controlsStage.setX(primaryStage.getX() + (primaryStage.getWidth() - 480) / 2);
-        controlsStage.setY(primaryStage.getY() + (primaryStage.getHeight() - 450) / 2);
+        controlsStage.setY(primaryStage.getY() + (primaryStage.getHeight() - 520) / 2);
         
         controlsStage.show();
         controlsStage.requestFocus();

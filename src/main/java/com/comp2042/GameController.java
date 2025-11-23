@@ -97,15 +97,21 @@ public class GameController implements InputEventListener {
                 board.getScore().add(clearRow.getScoreBonus());
                 checkAndUpdateHighScore();
             }
+            
+            // Refresh background to show locked blocks before checking for game over
+            viewGuiController.refreshGameBackground(board.getBoardMatrix());
+            
+            // Create new brick and check for immediate collision (game over)
             if (board.createNewBrick()) {
+                // Immediate collision detected - game over, don't draw the colliding block
                 viewGuiController.gameOver();
+                return new DownData(clearRow, null); // Return null ViewData to prevent drawing
             } else {
+                // No collision - proceed normally
                 rotateBlockQueue();
                 refreshBlockReferences();
                 canHold = true; // Allow hold again when a block locks and new one appears
             }
-
-            viewGuiController.refreshGameBackground(board.getBoardMatrix());
 
         } else {
             if (event.getEventSource() == EventSource.USER) {
@@ -255,15 +261,21 @@ public class GameController implements InputEventListener {
             // Show the score notification popup
             viewGuiController.showScoreNotification(clearRow);
         }
+        
+        // Refresh background to show locked blocks before checking for game over
+        viewGuiController.refreshGameBackground(board.getBoardMatrix());
+        
+        // Create new brick and check for immediate collision (game over)
         if (board.createNewBrick()) {
+            // Immediate collision detected - game over, don't draw the colliding block
             viewGuiController.gameOver();
+            return; // Exit early, don't draw the colliding block
         } else {
+            // No collision - proceed normally
             rotateBlockQueue();
             refreshBlockReferences();
             canHold = true; // Allow hold again when a block locks and new one appears
+            viewGuiController.refreshBrick(board.getViewData());
         }
-
-        viewGuiController.refreshGameBackground(board.getBoardMatrix());
-        viewGuiController.refreshBrick(board.getViewData());
     }
 }
