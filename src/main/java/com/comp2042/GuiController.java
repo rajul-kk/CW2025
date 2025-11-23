@@ -1,5 +1,6 @@
 package com.comp2042;
 
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
@@ -7,7 +8,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -20,7 +20,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
@@ -44,6 +43,7 @@ import java.util.ResourceBundle;
 public class GuiController implements Initializable {
 
     private static final int BRICK_SIZE = 20;
+    private static final String BUTTON_STYLE = "-fx-font-size: 16px; -fx-pref-width: 150px; -fx-pref-height: 35px;";
 
     @FXML
     private GridPane gamePanel;
@@ -112,62 +112,135 @@ public class GuiController implements Initializable {
         Font.loadFont(getClass().getClassLoader().getResource("digital.ttf").toExternalForm(), 38);
         gamePanel.setFocusTraversable(true);
         gamePanel.requestFocus();
-        gamePanel.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                if (isPause.getValue() == Boolean.FALSE && isGameOver.getValue() == Boolean.FALSE) {
-                    if (keyEvent.getCode() == KeyCode.LEFT || keyEvent.getCode() == KeyCode.A) {
-                        refreshBrick(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
-                        keyEvent.consume();
-                    }
-                    if (keyEvent.getCode() == KeyCode.RIGHT || keyEvent.getCode() == KeyCode.D) {
-                        refreshBrick(eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER)));
-                        keyEvent.consume();
-                    }
-                    if (keyEvent.getCode() == KeyCode.UP || keyEvent.getCode() == KeyCode.W) {
-                        refreshBrick(eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER)));
-                        keyEvent.consume();
-                    }
-                    if (keyEvent.getCode() == KeyCode.DOWN || keyEvent.getCode() == KeyCode.S) {
-                        moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
-                        keyEvent.consume();
-                    }
-                    if (keyEvent.getCode() == KeyCode.C) {
-                        ViewData viewData = eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER));
-                        if (viewData != null) {
-                            refreshBrick(viewData);
-                        }
-                        keyEvent.consume();
-                    }
-                    if (keyEvent.getCode() == KeyCode.SPACE) {
-                        long currentTime = System.currentTimeMillis();
-                        if (currentTime - lastDropTime > DROP_COOLDOWN) {
-                            lastDropTime = currentTime;
-                            if (eventListener instanceof GameController) {
-                                ((GameController) eventListener).dropInstant();
-                            }
-                        }
-                        keyEvent.consume();
-                    }
-                }
-                if (keyEvent.getCode() == KeyCode.N) {
-                    newGame(null);
-                }
-                if (keyEvent.getCode() == KeyCode.ESCAPE) {
-                    togglePause(null);
-                    keyEvent.consume();
-                }
-            }
-        });
+        gamePanel.setOnKeyPressed(this::handleKeyPressed);
         if (gameOverScreen != null) {
             gameOverScreen.setVisible(false);
             gameOverScreen.setManaged(false);
         }
+    }
 
-        final Reflection reflection = new Reflection();
-        reflection.setFraction(0.8);
-        reflection.setTopOpacity(0.9);
-        reflection.setTopOffset(-12);
+    private void handleKeyPressed(KeyEvent e) {
+        KeyCode code = e.getCode();
+        boolean gameActive = !isPause.getValue() && !isGameOver.getValue();
+        
+        if (gameActive && handleGameActiveKeys(code, e)) {
+            return;
+        }
+        
+        handleMenuKeys(code, e);
+    }
+
+    private boolean handleGameActiveKeys(KeyCode code, KeyEvent e) {
+        if (isMovementKey(code)) {
+            return handleMovementKey(code, e);
+        }
+        
+        if (code == KeyCode.C) {
+            handleHoldKey(e);
+            return true;
+        }
+        
+        if (code == KeyCode.SPACE) {
+            handleHardDropKey();
+            e.consume();
+            return true;
+        }
+        
+        return false;
+    }
+
+    private boolean isMovementKey(KeyCode code) {
+        return code == KeyCode.LEFT || code == KeyCode.A ||
+               code == KeyCode.RIGHT || code == KeyCode.D ||
+               code == KeyCode.UP || code == KeyCode.W ||
+               code == KeyCode.DOWN || code == KeyCode.S;
+    }
+
+    private boolean handleMovementKey(KeyCode code, KeyEvent e) {
+        if (isLeftKey(code)) {
+            handleLeftMovement(e);
+            return true;
+        }
+        
+        if (isRightKey(code)) {
+            handleRightMovement(e);
+            return true;
+        }
+        
+        if (isUpKey(code)) {
+            handleRotateMovement(e);
+            return true;
+        }
+        
+        if (isDownKey(code)) {
+            handleDownMovement(e);
+            return true;
+        }
+        
+        return false;
+    }
+
+    private boolean isLeftKey(KeyCode code) {
+        return code == KeyCode.LEFT || code == KeyCode.A;
+    }
+
+    private boolean isRightKey(KeyCode code) {
+        return code == KeyCode.RIGHT || code == KeyCode.D;
+    }
+
+    private boolean isUpKey(KeyCode code) {
+        return code == KeyCode.UP || code == KeyCode.W;
+    }
+
+    private boolean isDownKey(KeyCode code) {
+        return code == KeyCode.DOWN || code == KeyCode.S;
+    }
+
+    private void handleLeftMovement(KeyEvent e) {
+        refreshBrick(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
+        e.consume();
+    }
+
+    private void handleRightMovement(KeyEvent e) {
+        refreshBrick(eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER)));
+        e.consume();
+    }
+
+    private void handleRotateMovement(KeyEvent e) {
+        refreshBrick(eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER)));
+        e.consume();
+    }
+
+    private void handleDownMovement(KeyEvent e) {
+        moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
+        e.consume();
+    }
+
+    private void handleHoldKey(KeyEvent e) {
+        ViewData viewData = eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER));
+        if (viewData != null) {
+            refreshBrick(viewData);
+        }
+        e.consume();
+    }
+
+    private void handleHardDropKey() {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastDropTime > DROP_COOLDOWN) {
+            lastDropTime = currentTime;
+            if (eventListener instanceof GameController gameController) {
+                gameController.dropInstant();
+            }
+        }
+    }
+
+    private void handleMenuKeys(KeyCode code, KeyEvent e) {
+        if (code == KeyCode.N) {
+            newGame(null);
+        } else if (code == KeyCode.ESCAPE) {
+            togglePause();
+            e.consume();
+        }
     }
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
@@ -189,7 +262,7 @@ public class GuiController implements Initializable {
                 Duration.millis(400),
                 ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
         ));
-        timeLine.setCycleCount(Timeline.INDEFINITE);
+        timeLine.setCycleCount(Animation.INDEFINITE);
         timeLine.play();
     }
 
@@ -290,8 +363,7 @@ public class GuiController implements Initializable {
             updateFallingBlock(brick);
             
             // Draw ghost piece showing where block will land
-            if (eventListener instanceof GameController) {
-                GameController gameController = (GameController) eventListener;
+            if (eventListener instanceof GameController gameController) {
                 int ghostY = gameController.calculateGhostY();
                 Block currentBlock = new Block(brick.getBrickData());
                 drawGhost(currentBlock, brick.getxPosition(), ghostY);
@@ -462,8 +534,10 @@ public class GuiController implements Initializable {
                 notificationPanel.setLayoutY(localPoint.getY());
             }
             
-            groupNotification.getChildren().add(notificationPanel);
-            notificationPanel.showScore(groupNotification.getChildren());
+            if (groupNotification != null) {
+                groupNotification.getChildren().add(notificationPanel);
+                notificationPanel.showScore(groupNotification.getChildren());
+            }
         }
     }
 
@@ -530,15 +604,15 @@ public class GuiController implements Initializable {
 
     @FXML
     public void pauseGame(ActionEvent actionEvent) {
-        togglePause(actionEvent);
+        togglePause();
     }
 
-    public void togglePause(ActionEvent actionEvent) {
-        if (isGameOver.getValue()) {
+    public void togglePause() {
+        if (isGameOver.get()) {
             return; // Don't allow pausing when game is over
         }
         
-        boolean currentlyPaused = isPause.getValue();
+        boolean currentlyPaused = isPause.get();
         
         if (currentlyPaused) {
             // Resume the game
@@ -582,29 +656,29 @@ public class GuiController implements Initializable {
         pauseTitle.setStyle("-fx-font-family: 'Let\'s go Digital'; -fx-font-size: 36px; -fx-text-fill: yellow; -fx-font-weight: bold;");
         
         Button resumeButton = new Button("Resume");
-        resumeButton.setStyle("-fx-font-size: 16px; -fx-pref-width: 150px; -fx-pref-height: 35px;");
+        resumeButton.setStyle(BUTTON_STYLE);
         resumeButton.setDefaultButton(true);
         resumeButton.setOnAction(e -> resumeGame());
         
-        Button newGameButton = new Button("New Game");
-        newGameButton.setStyle("-fx-font-size: 16px; -fx-pref-width: 150px; -fx-pref-height: 35px;");
-        newGameButton.setOnAction(e -> {
+        Button pauseNewGameButton = new Button("New Game");
+        pauseNewGameButton.setStyle(BUTTON_STYLE);
+        pauseNewGameButton.setOnAction(e -> {
             closePauseMenu();
             newGame(null);
         });
         
         Button controlsButton = new Button("Controls");
-        controlsButton.setStyle("-fx-font-size: 16px; -fx-pref-width: 150px; -fx-pref-height: 35px;");
+        controlsButton.setStyle(BUTTON_STYLE);
         controlsButton.setOnAction(e -> {
             closePauseMenu();
             showControls(null);
         });
         
-        Button exitButton = new Button("Exit");
-        exitButton.setStyle("-fx-font-size: 16px; -fx-pref-width: 150px; -fx-pref-height: 35px;");
-        exitButton.setOnAction(e -> exitGame(null));
+        Button pauseExitButton = new Button("Exit");
+        pauseExitButton.setStyle(BUTTON_STYLE);
+        pauseExitButton.setOnAction(e -> exitGame(null));
         
-        pauseMenu.getChildren().addAll(pauseTitle, resumeButton, newGameButton, controlsButton, exitButton);
+        pauseMenu.getChildren().addAll(pauseTitle, resumeButton, pauseNewGameButton, controlsButton, pauseExitButton);
         
         Scene pauseScene = new Scene(pauseMenu, 250, 350);
         pauseScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
@@ -802,12 +876,13 @@ public class GuiController implements Initializable {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("About TetrisJFX");
         alert.setHeaderText("TetrisJFX");
-        alert.setContentText(
-            "A classic Tetris game implementation in JavaFX.\n\n" +
-            "Clear rows by completing horizontal lines.\n" +
-            "Score points by clearing multiple rows at once!\n\n" +
-            "Version 1.0"
-        );
+        alert.setContentText("""
+            A classic Tetris game implementation in JavaFX.
+
+            Clear rows by completing horizontal lines.
+            Score points by clearing multiple rows at once!
+
+            Version 1.0""");
         alert.showAndWait();
         gamePanel.requestFocus();
     }
@@ -885,8 +960,8 @@ public class GuiController implements Initializable {
             for (int j = 0; j < shape[i].length; j++) {
                 if (shape[i][j] != 0) {
                     Rectangle rectangle = createPreviewRectangle(shape[i][j], blockSize);
-                    rectangle.setLayoutX(offsetX + j * blockSize);
-                    rectangle.setLayoutY(offsetY + i * blockSize);
+                    rectangle.setLayoutX((double) offsetX + j * blockSize);
+                    rectangle.setLayoutY((double) offsetY + i * blockSize);
                     pane.getChildren().add(rectangle);
                 }
             }
@@ -929,30 +1004,38 @@ public class GuiController implements Initializable {
         for (int i = 0; i < brickData.length; i++) {
             for (int j = 0; j < brickData[i].length; j++) {
                 if (brickData[j][i] != 0) {
-                    // Calculate the board position (matching merge function: targetX = x + i, targetY = y + j)
-                    int boardCol = xPos + i;  // i maps to column (X)
-                    int boardRow = yPos + j;  // j maps to row (Y)
-
-                    // Check bounds and get the corresponding rectangle
-                    if (boardRow >= 2 && boardRow < displayMatrix.length && 
-                        boardCol >= 0 && boardCol < displayMatrix[boardRow].length) {
-                        Rectangle rectangle = displayMatrix[boardRow][boardCol];
-                        
-                        if (rectangle != null) {
-                            // Create a scale transition that pulses the rectangle
-                            ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(150), rectangle);
-                            scaleTransition.setFromX(1.0);
-                            scaleTransition.setFromY(1.0);
-                            scaleTransition.setToX(1.2);
-                            scaleTransition.setToY(1.2);
-                            scaleTransition.setAutoReverse(true);
-                            scaleTransition.setCycleCount(2);
-                            scaleTransition.play();
-                        }
-                    }
+                    animateRectangleAtPosition(xPos, yPos, i, j);
                 }
             }
         }
+    }
+
+    private void animateRectangleAtPosition(int xPos, int yPos, int i, int j) {
+        int boardCol = xPos + i;  // i maps to column (X)
+        int boardRow = yPos + j;  // j maps to row (Y)
+
+        if (isValidBoardPosition(boardRow, boardCol)) {
+            Rectangle rectangle = displayMatrix[boardRow][boardCol];
+            if (rectangle != null) {
+                createAndPlayScaleTransition(rectangle);
+            }
+        }
+    }
+
+    private boolean isValidBoardPosition(int boardRow, int boardCol) {
+        return boardRow >= 2 && boardRow < displayMatrix.length && 
+               boardCol >= 0 && boardCol < displayMatrix[boardRow].length;
+    }
+
+    private void createAndPlayScaleTransition(Rectangle rectangle) {
+        ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(150), rectangle);
+        scaleTransition.setFromX(1.0);
+        scaleTransition.setFromY(1.0);
+        scaleTransition.setToX(1.2);
+        scaleTransition.setToY(1.2);
+        scaleTransition.setAutoReverse(true);
+        scaleTransition.setCycleCount(2);
+        scaleTransition.play();
     }
 
     /**
