@@ -41,7 +41,6 @@ public class GuiController implements Initializable {
     private static final int BRICK_SIZE = 20;
     private static final String CSS_CONTROLS_ITEM = "controls-item";
     private static final String CSS_CONTROLS_SECTION_HEADER = "controls-section-header";
-    private static final String CSS_PAUSE_MENU_BUTTON = "pause-menu-button";
 
     @FXML
     private GridPane gamePanel;
@@ -87,7 +86,7 @@ public class GuiController implements Initializable {
 
     private Rectangle[][] displayMatrix;
     
-    private Stage pauseMenuStage;
+    private PauseMenuDialog pauseMenuDialog;
 
     private InputEventListener eventListener;
 
@@ -145,6 +144,18 @@ public class GuiController implements Initializable {
 
         // Initialize falling block
         updateFallingBlock(brick);
+
+        // Initialize pause menu dialog
+        if (pauseMenuDialog == null) {
+            Stage primaryStage = (Stage) gamePanel.getScene().getWindow();
+            pauseMenuDialog = new PauseMenuDialog(
+                primaryStage,
+                this::resumeGame,
+                () -> newGame(null),
+                () -> showControls(null),
+                () -> exitGame(null)
+            );
+        }
 
         timeLine = new Timeline(new KeyFrame(
                 Duration.millis(400),
@@ -408,74 +419,14 @@ public class GuiController implements Initializable {
     }
     
     private void showPauseMenu() {
-        if (pauseMenuStage != null && pauseMenuStage.isShowing()) {
-            return; // Already showing
+        if (pauseMenuDialog != null) {
+            pauseMenuDialog.show();
         }
-        
-        Stage primaryStage = (Stage) gamePanel.getScene().getWindow();
-        
-        VBox pauseMenu = new VBox(20);
-        pauseMenu.setAlignment(Pos.CENTER);
-        pauseMenu.setPadding(new Insets(30));
-        pauseMenu.getStyleClass().add("pause-menu");
-        
-        Label pauseTitle = new Label("GAME PAUSED");
-        pauseTitle.getStyleClass().add("pause-title");
-        
-        Button resumeButton = new Button("Resume");
-        resumeButton.getStyleClass().add(CSS_PAUSE_MENU_BUTTON);
-        resumeButton.setDefaultButton(true);
-        resumeButton.setOnAction(e -> resumeGame());
-        
-        Button pauseNewGameButton = new Button("New Game");
-        pauseNewGameButton.getStyleClass().add(CSS_PAUSE_MENU_BUTTON);
-        pauseNewGameButton.setOnAction(e -> {
-            closePauseMenu();
-            newGame(null);
-        });
-        
-        Button controlsButton = new Button("Controls");
-        controlsButton.getStyleClass().add(CSS_PAUSE_MENU_BUTTON);
-        controlsButton.setOnAction(e -> {
-            closePauseMenu();
-            showControls(null);
-        });
-        
-        Button pauseExitButton = new Button("Exit");
-        pauseExitButton.getStyleClass().add(CSS_PAUSE_MENU_BUTTON);
-        pauseExitButton.setOnAction(e -> exitGame(null));
-        
-        pauseMenu.getChildren().addAll(pauseTitle, resumeButton, pauseNewGameButton, controlsButton, pauseExitButton);
-        
-        Scene pauseScene = new Scene(pauseMenu, 250, 350);
-        pauseScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
-        pauseScene.getStylesheets().add(getClass().getClassLoader().getResource("window_style.css").toExternalForm());
-        
-        // Allow ESC to resume the game from the pause menu
-        pauseScene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ESCAPE) {
-                resumeGame();
-                e.consume();
-            }
-        });
-        
-        pauseMenuStage = new Stage();
-        pauseMenuStage.initOwner(primaryStage);
-        pauseMenuStage.initModality(Modality.WINDOW_MODAL);
-        pauseMenuStage.initStyle(StageStyle.TRANSPARENT);
-        pauseMenuStage.setScene(pauseScene);
-        
-        // Center the pause menu over the game window
-        pauseMenuStage.setX(primaryStage.getX() + (primaryStage.getWidth() - 250) / 2);
-        pauseMenuStage.setY(primaryStage.getY() + (primaryStage.getHeight() - 350) / 2);
-        
-        pauseMenuStage.show();
-        pauseMenuStage.requestFocus();
     }
     
     private void closePauseMenu() {
-        if (pauseMenuStage != null && pauseMenuStage.isShowing()) {
-            pauseMenuStage.close();
+        if (pauseMenuDialog != null) {
+            pauseMenuDialog.close();
         }
     }
 
