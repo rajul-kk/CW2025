@@ -1,0 +1,246 @@
+package com.comp2042;
+
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Paint;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.StrokeType;
+
+import java.util.List;
+
+/**
+ * Helper class for rendering blocks to different containers.
+ * Handles drawing falling blocks, ghost blocks, and preview blocks.
+ */
+public class BlockRenderer {
+    
+    private static final int GAME_BRICK_SIZE = 20;
+    private static final int PREVIEW_BRICK_SIZE = 15;
+    private static final int HIDDEN_ROW_OFFSET = 2;
+    private static final int BOARD_WIDTH = 10;
+    
+    /**
+     * Renders a block to a GridPane (for falling blocks and ghost blocks on the game board).
+     * 
+     * @param shape The block shape data (2D array)
+     * @param xPos The X position on the board
+     * @param yPos The Y position on the board
+     * @param gridPane The GridPane to render to
+     * @param nodeList List to store the created nodes (for later removal)
+     * @param style The rendering style (NORMAL or GHOST)
+     */
+    public void renderToGridPane(int[][] shape, int xPos, int yPos, 
+                                  GridPane gridPane, List<javafx.scene.Node> nodeList, 
+                                  BlockStyle style) {
+        if (shape == null || gridPane == null) {
+            return;
+        }
+        
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] != 0) {
+                    Rectangle rectangle = createRectangle(shape[i][j], GAME_BRICK_SIZE, style);
+                    
+                    int gridColumn = xPos + j;
+                    int gridRow = yPos + i - HIDDEN_ROW_OFFSET;
+                    
+                    if (isValidGridPosition(gridRow, gridColumn)) {
+                        gridPane.add(rectangle, gridColumn, gridRow);
+                        if (nodeList != null) {
+                            nodeList.add(rectangle);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Renders a block to a Pane (for preview blocks like next blocks and hold block).
+     * 
+     * @param shape The block shape data (2D array)
+     * @param pane The Pane to render to
+     * @param style The rendering style (should be PREVIEW)
+     */
+    public void renderToPane(int[][] shape, Pane pane, BlockStyle style) {
+        if (shape == null || pane == null) {
+            return;
+        }
+        
+        pane.getChildren().clear();
+        
+        int offsetX = (int) (pane.getPrefWidth() - shape[0].length * PREVIEW_BRICK_SIZE) / 2;
+        int offsetY = (int) (pane.getPrefHeight() - shape.length * PREVIEW_BRICK_SIZE) / 2;
+        
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] != 0) {
+                    Rectangle rectangle = createRectangle(shape[i][j], PREVIEW_BRICK_SIZE, style);
+                    rectangle.setLayoutX((double) offsetX + j * PREVIEW_BRICK_SIZE);
+                    rectangle.setLayoutY((double) offsetY + i * PREVIEW_BRICK_SIZE);
+                    pane.getChildren().add(rectangle);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Creates a styled rectangle based on the color code and style.
+     */
+    private Rectangle createRectangle(int colorCode, int size, BlockStyle style) {
+        Rectangle rectangle = new Rectangle(size, size);
+        
+        if (style == BlockStyle.GHOST) {
+            configureGhostStyle(rectangle);
+        } else if (style == BlockStyle.PREVIEW) {
+            configurePreviewStyle(rectangle, colorCode);
+        } else { // NORMAL
+            configureNormalStyle(rectangle, colorCode);
+        }
+        
+        return rectangle;
+    }
+    
+    private void configureNormalStyle(Rectangle rectangle, int colorCode) {
+        rectangle.setFill(BlockRenderer.getFillColor(colorCode));
+        rectangle.setStroke(BlockRenderer.getBorderColor(colorCode));
+        rectangle.setStrokeType(StrokeType.INSIDE);
+        rectangle.setStrokeWidth(1.5);
+        rectangle.setArcHeight(9);
+        rectangle.setArcWidth(9);
+    }
+    
+    private void configurePreviewStyle(Rectangle rectangle, int colorCode) {
+        rectangle.setFill(BlockRenderer.getFillColor(colorCode));
+        rectangle.setStroke(BlockRenderer.getBorderColor(colorCode));
+        rectangle.setStrokeType(StrokeType.INSIDE);
+        rectangle.setStrokeWidth(1.0);
+        rectangle.setArcHeight(5);
+        rectangle.setArcWidth(5);
+    }
+    
+    private void configureGhostStyle(Rectangle rectangle) {
+        rectangle.setFill(Color.TRANSPARENT);
+        rectangle.setStroke(Color.color(1, 1, 1, 0.5));
+        rectangle.setStrokeType(StrokeType.INSIDE);
+        rectangle.setStrokeWidth(2);
+        rectangle.getStrokeDashArray().addAll(5d, 5d);
+        rectangle.setArcHeight(9);
+        rectangle.setArcWidth(9);
+    }
+    
+    private boolean isValidGridPosition(int row, int column) {
+        return row >= 0 && column >= 0 && column < BOARD_WIDTH;
+    }
+    
+    /**
+     * Gets the fill color for a given color code.
+     * Public static method for use in other classes (e.g., for background rendering).
+     */
+    public static Paint getFillColor(int i) {
+        Paint returnPaint;
+        switch (i) {
+            case 0:
+                returnPaint = Color.TRANSPARENT;
+                break;
+            case 1:
+                // AQUA - Cyan gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(0, 255, 255)),
+                    new Stop(0.3, Color.rgb(0, 200, 255)),
+                    new Stop(0.7, Color.rgb(0, 150, 200)),
+                    new Stop(1.0, Color.rgb(0, 100, 150)));
+                break;
+            case 2:
+                // BLUEVIOLET - Purple gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(138, 43, 226)),
+                    new Stop(0.3, Color.rgb(120, 30, 200)),
+                    new Stop(0.7, Color.rgb(100, 20, 170)),
+                    new Stop(1.0, Color.rgb(80, 10, 140)));
+                break;
+            case 3:
+                // DARKGREEN - Green gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(0, 200, 0)),
+                    new Stop(0.3, Color.rgb(0, 150, 0)),
+                    new Stop(0.7, Color.rgb(0, 100, 0)),
+                    new Stop(1.0, Color.rgb(0, 60, 0)));
+                break;
+            case 4:
+                // YELLOW - Yellow gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(255, 255, 0)),
+                    new Stop(0.3, Color.rgb(255, 220, 0)),
+                    new Stop(0.7, Color.rgb(220, 180, 0)),
+                    new Stop(1.0, Color.rgb(180, 140, 0)));
+                break;
+            case 5:
+                // RED - Red gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(255, 0, 0)),
+                    new Stop(0.3, Color.rgb(220, 0, 0)),
+                    new Stop(0.7, Color.rgb(180, 0, 0)),
+                    new Stop(1.0, Color.rgb(140, 0, 0)));
+                break;
+            case 6:
+                // BEIGE - Orange gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(255, 200, 150)),
+                    new Stop(0.3, Color.rgb(255, 180, 120)),
+                    new Stop(0.7, Color.rgb(220, 150, 100)),
+                    new Stop(1.0, Color.rgb(180, 120, 80)));
+                break;
+            case 7:
+                // BURLYWOOD - Brown gem
+                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
+                    new Stop(0.0, Color.rgb(222, 184, 135)),
+                    new Stop(0.3, Color.rgb(200, 160, 110)),
+                    new Stop(0.7, Color.rgb(170, 130, 90)),
+                    new Stop(1.0, Color.rgb(140, 100, 70)));
+                break;
+            default:
+                returnPaint = Color.WHITE;
+                break;
+        }
+        return returnPaint;
+    }
+    
+    /**
+     * Gets the border color for a given color code.
+     * Public static method for use in other classes (e.g., for background rendering).
+     */
+    public static Color getBorderColor(int i) {
+        switch (i) {
+            case 1: // AQUA
+                return Color.rgb(150, 255, 255);
+            case 2: // BLUEVIOLET
+                return Color.rgb(180, 100, 255);
+            case 3: // DARKGREEN
+                return Color.rgb(100, 255, 100);
+            case 4: // YELLOW
+                return Color.rgb(255, 255, 150);
+            case 5: // RED
+                return Color.rgb(255, 150, 150);
+            case 6: // BEIGE
+                return Color.rgb(255, 220, 180);
+            case 7: // BURLYWOOD
+                return Color.rgb(240, 200, 160);
+            default:
+                return Color.WHITE;
+        }
+    }
+    
+    /**
+     * Enum for different block rendering styles.
+     */
+    public enum BlockStyle {
+        NORMAL,   // Normal falling block with colors
+        GHOST,    // Ghost block with transparent fill and dotted outline
+        PREVIEW   // Preview block for next/hold panes
+    }
+}
+

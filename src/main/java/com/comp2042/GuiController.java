@@ -2,7 +2,6 @@ package com.comp2042;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
-import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -29,9 +28,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Paint;
-import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
@@ -93,13 +90,15 @@ public class GuiController implements Initializable {
 
     private InputEventListener eventListener;
 
-    private Rectangle[][] rectangles;
-
     private Timeline timeLine;
 
     private final BooleanProperty isPause = new SimpleBooleanProperty();
+    
+    private final BlockRenderer blockRenderer = new BlockRenderer();
 
     private final BooleanProperty isGameOver = new SimpleBooleanProperty();
+    
+    private final GameEffects gameEffects = new GameEffects();
 
     private java.util.List<javafx.scene.Node> currentFallingBlockNodes = new java.util.ArrayList<>();
     private java.util.List<javafx.scene.Node> currentGhostNodes = new java.util.ArrayList<>();
@@ -254,8 +253,7 @@ public class GuiController implements Initializable {
             }
         }
 
-        // Initialize falling block rectangles directly on gamePanel
-        rectangles = new Rectangle[brick.getBrickData().length][brick.getBrickData()[0].length];
+        // Initialize falling block
         updateFallingBlock(brick);
 
         timeLine = new Timeline(new KeyFrame(
@@ -267,93 +265,11 @@ public class GuiController implements Initializable {
     }
 
     private Paint getFillColor(int i) {
-        Paint returnPaint;
-        switch (i) {
-            case 0:
-                returnPaint = Color.TRANSPARENT;
-                break;
-            case 1:
-                // AQUA - Cyan gem
-                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
-                    new Stop(0.0, Color.rgb(0, 255, 255)),
-                    new Stop(0.3, Color.rgb(0, 200, 255)),
-                    new Stop(0.7, Color.rgb(0, 150, 200)),
-                    new Stop(1.0, Color.rgb(0, 100, 150)));
-                break;
-            case 2:
-                // BLUEVIOLET - Purple gem
-                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
-                    new Stop(0.0, Color.rgb(138, 43, 226)),
-                    new Stop(0.3, Color.rgb(120, 30, 200)),
-                    new Stop(0.7, Color.rgb(100, 20, 170)),
-                    new Stop(1.0, Color.rgb(80, 10, 140)));
-                break;
-            case 3:
-                // DARKGREEN - Green gem
-                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
-                    new Stop(0.0, Color.rgb(0, 200, 0)),
-                    new Stop(0.3, Color.rgb(0, 150, 0)),
-                    new Stop(0.7, Color.rgb(0, 100, 0)),
-                    new Stop(1.0, Color.rgb(0, 60, 0)));
-                break;
-            case 4:
-                // YELLOW - Yellow gem
-                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
-                    new Stop(0.0, Color.rgb(255, 255, 0)),
-                    new Stop(0.3, Color.rgb(255, 220, 0)),
-                    new Stop(0.7, Color.rgb(220, 180, 0)),
-                    new Stop(1.0, Color.rgb(180, 140, 0)));
-                break;
-            case 5:
-                // RED - Red gem
-                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
-                    new Stop(0.0, Color.rgb(255, 0, 0)),
-                    new Stop(0.3, Color.rgb(220, 0, 0)),
-                    new Stop(0.7, Color.rgb(180, 0, 0)),
-                    new Stop(1.0, Color.rgb(140, 0, 0)));
-                break;
-            case 6:
-                // BEIGE - Orange gem
-                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
-                    new Stop(0.0, Color.rgb(255, 200, 150)),
-                    new Stop(0.3, Color.rgb(255, 180, 120)),
-                    new Stop(0.7, Color.rgb(220, 150, 100)),
-                    new Stop(1.0, Color.rgb(180, 120, 80)));
-                break;
-            case 7:
-                // BURLYWOOD - Brown gem
-                returnPaint = new LinearGradient(0, 0, 1, 1, true, null,
-                    new Stop(0.0, Color.rgb(222, 184, 135)),
-                    new Stop(0.3, Color.rgb(200, 160, 110)),
-                    new Stop(0.7, Color.rgb(170, 130, 90)),
-                    new Stop(1.0, Color.rgb(140, 100, 70)));
-                break;
-            default:
-                returnPaint = Color.WHITE;
-                break;
-        }
-        return returnPaint;
+        return BlockRenderer.getFillColor(i);
     }
     
     private Color getBorderColor(int i) {
-        switch (i) {
-            case 1: // AQUA
-                return Color.rgb(150, 255, 255);
-            case 2: // BLUEVIOLET
-                return Color.rgb(180, 100, 255);
-            case 3: // DARKGREEN
-                return Color.rgb(100, 255, 100);
-            case 4: // YELLOW
-                return Color.rgb(255, 255, 150);
-            case 5: // RED
-                return Color.rgb(255, 150, 150);
-            case 6: // BEIGE
-                return Color.rgb(255, 220, 180);
-            case 7: // BURLYWOOD
-                return Color.rgb(240, 200, 160);
-            default:
-                return Color.WHITE;
-        }
+        return BlockRenderer.getBorderColor(i);
     }
 
 
@@ -384,41 +300,13 @@ public class GuiController implements Initializable {
         // Clear ghost when updating falling block
         clearGhost();
         
-        // Clear the rectangles array
-        rectangles = new Rectangle[brick.getBrickData().length][brick.getBrickData()[0].length];
-        
         int xPos = brick.getxPosition();
         int yPos = brick.getyPosition();
         int[][] brickData = brick.getBrickData();
         
-        // Create and add new rectangles at correct grid positions
-        for (int i = 0; i < brickData.length; i++) {
-            for (int j = 0; j < brickData[i].length; j++) {
-                if (brickData[i][j] != 0) {
-                    Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
-                    rectangle.setFill(getFillColor(brickData[i][j]));
-                    rectangle.setStroke(getBorderColor(brickData[i][j]));
-                    rectangle.setStrokeType(StrokeType.INSIDE);
-                    rectangle.setStrokeWidth(1.5);
-                    rectangle.setArcHeight(9);
-                    rectangle.setArcWidth(9);
-                    
-                    rectangles[i][j] = rectangle;
-                    
-                    // Calculate grid position: column = xPos + j, row = yPos + i - 2 (offset for hidden rows)
-                    int gridColumn = xPos + j;
-                    int gridRow = yPos + i - 2; // -2 because board starts at row 2
-                    
-                    // Only add if within visible bounds
-                    if (gridRow >= 0 && gridColumn >= 0 && gridColumn < 10) {
-                        gamePanel.add(rectangle, gridColumn, gridRow);
-                        currentFallingBlockNodes.add(rectangle);
-                    }
-                } else {
-                    rectangles[i][j] = null;
-                }
-            }
-        }
+        // Use BlockRenderer to render the falling block
+        blockRenderer.renderToGridPane(brickData, xPos, yPos, gamePanel, 
+                                       currentFallingBlockNodes, BlockRenderer.BlockStyle.NORMAL);
     }
 
     /**
@@ -437,38 +325,9 @@ public class GuiController implements Initializable {
         
         int[][] shape = block.getShape();
         
-        // Create ghost rectangles with dotted outline style
-        for (int i = 0; i < shape.length; i++) {
-            for (int j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] != 0) {
-                    Rectangle ghostRect = new Rectangle(BRICK_SIZE, BRICK_SIZE);
-                    
-                    // Transparent fill for outline-only style
-                    ghostRect.setFill(Color.TRANSPARENT);
-                    
-                    // Semi-transparent white stroke for visibility
-                    ghostRect.setStroke(Color.color(1, 1, 1, 0.5));
-                    ghostRect.setStrokeType(StrokeType.INSIDE);
-                    ghostRect.setStrokeWidth(2);
-                    
-                    // Apply dotted pattern to the stroke
-                    ghostRect.getStrokeDashArray().addAll(5d, 5d);
-                    
-                    ghostRect.setArcHeight(9);
-                    ghostRect.setArcWidth(9);
-                    
-                    // Calculate grid position: column = xPos + j, row = ghostY + i - 2 (offset for hidden rows)
-                    int gridColumn = xPos + j;
-                    int gridRow = ghostY + i - 2; // -2 because board starts at row 2
-                    
-                    // Only add if within visible bounds
-                    if (gridRow >= 0 && gridColumn >= 0 && gridColumn < 10) {
-                        gamePanel.add(ghostRect, gridColumn, gridRow);
-                        currentGhostNodes.add(ghostRect);
-                    }
-                }
-            }
-        }
+        // Use BlockRenderer to render the ghost block
+        blockRenderer.renderToGridPane(shape, xPos, ghostY, gamePanel, 
+                                      currentGhostNodes, BlockRenderer.BlockStyle.GHOST);
     }
 
     /**
@@ -921,51 +780,20 @@ public class GuiController implements Initializable {
     }
 
     /**
-     * Helper method to create a preview rectangle with consistent styling.
-     * @param color The color code for the block
-     * @param size The size of the rectangle
-     * @return A styled Rectangle ready for display
-     */
-    private Rectangle createPreviewRectangle(int color, int size) {
-        Rectangle rectangle = new Rectangle(size, size);
-        rectangle.setFill(getFillColor(color));
-        rectangle.setStroke(getBorderColor(color));
-        rectangle.setStrokeType(StrokeType.INSIDE);
-        rectangle.setStrokeWidth(1.0);
-        rectangle.setArcHeight(5);
-        rectangle.setArcWidth(5);
-        return rectangle;
-    }
-
-    /**
      * Draws a block in the specified pane. Handles centering and styling.
      * @param block The block to draw, or null to clear the pane
      * @param pane The pane to draw in
      */
     private void drawBlockInPane(Block block, Pane pane) {
-        if (pane == null) {
-            return;
-        }
-        pane.getChildren().clear();
         if (block == null) {
+            if (pane != null) {
+                pane.getChildren().clear();
+            }
             return;
         }
         
         int[][] shape = block.getShape();
-        int blockSize = 15; // Size for preview blocks
-        int offsetX = (int) (pane.getPrefWidth() - shape[0].length * blockSize) / 2;
-        int offsetY = (int) (pane.getPrefHeight() - shape.length * blockSize) / 2;
-        
-        for (int i = 0; i < shape.length; i++) {
-            for (int j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] != 0) {
-                    Rectangle rectangle = createPreviewRectangle(shape[i][j], blockSize);
-                    rectangle.setLayoutX((double) offsetX + j * blockSize);
-                    rectangle.setLayoutY((double) offsetY + i * blockSize);
-                    pane.getChildren().add(rectangle);
-                }
-            }
-        }
+        blockRenderer.renderToPane(shape, pane, BlockRenderer.BlockStyle.PREVIEW);
     }
 
     public void drawNextBlock1(Block block) {
@@ -999,43 +827,7 @@ public class GuiController implements Initializable {
         int xPos = viewData.getxPosition();
         int yPos = viewData.getyPosition();
 
-        // Animate each rectangle that is part of the locked block
-        // Note: brickData is indexed as [column][row] based on merge function
-        for (int i = 0; i < brickData.length; i++) {
-            for (int j = 0; j < brickData[i].length; j++) {
-                if (brickData[j][i] != 0) {
-                    animateRectangleAtPosition(xPos, yPos, i, j);
-                }
-            }
-        }
-    }
-
-    private void animateRectangleAtPosition(int xPos, int yPos, int i, int j) {
-        int boardCol = xPos + i;  // i maps to column (X)
-        int boardRow = yPos + j;  // j maps to row (Y)
-
-        if (isValidBoardPosition(boardRow, boardCol)) {
-            Rectangle rectangle = displayMatrix[boardRow][boardCol];
-            if (rectangle != null) {
-                createAndPlayScaleTransition(rectangle);
-            }
-        }
-    }
-
-    private boolean isValidBoardPosition(int boardRow, int boardCol) {
-        return boardRow >= 2 && boardRow < displayMatrix.length && 
-               boardCol >= 0 && boardCol < displayMatrix[boardRow].length;
-    }
-
-    private void createAndPlayScaleTransition(Rectangle rectangle) {
-        ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(150), rectangle);
-        scaleTransition.setFromX(1.0);
-        scaleTransition.setFromY(1.0);
-        scaleTransition.setToX(1.2);
-        scaleTransition.setToY(1.2);
-        scaleTransition.setAutoReverse(true);
-        scaleTransition.setCycleCount(2);
-        scaleTransition.play();
+        gameEffects.animateLockBlock(displayMatrix, brickData, xPos, yPos);
     }
 
     /**
@@ -1043,47 +835,6 @@ public class GuiController implements Initializable {
      * Shakes the game board randomly by small amounts and returns to center.
      */
     public void shakeBoard() {
-        if (gameBoard == null) {
-            return;
-        }
-
-        // Create a Timeline with multiple keyframes for the shake effect
-        Timeline shakeTimeline = new Timeline();
-        
-        // Number of shake iterations
-        int shakeCount = 5;
-        Duration totalDuration = Duration.millis(100);
-        Duration frameDuration = Duration.millis(totalDuration.toMillis() / shakeCount);
-        
-        // Random offset range (in pixels)
-        double maxOffset = 3.0;
-        
-        // Store original position
-        double originalX = gameBoard.getTranslateX();
-        double originalY = gameBoard.getTranslateY();
-        
-        // Create keyframes for shake animation
-        for (int i = 0; i <= shakeCount; i++) {
-            final int frame = i;
-            KeyFrame keyFrame = new KeyFrame(
-                frameDuration.multiply(i),
-                e -> {
-                    if (frame == shakeCount) {
-                        // Last frame: return to original position
-                        gameBoard.setTranslateX(originalX);
-                        gameBoard.setTranslateY(originalY);
-                    } else {
-                        // Random shake offset
-                        double offsetX = (Math.random() * 2 - 1) * maxOffset; // -3 to +3
-                        double offsetY = (Math.random() * 2 - 1) * maxOffset; // -3 to +3
-                        gameBoard.setTranslateX(originalX + offsetX);
-                        gameBoard.setTranslateY(originalY + offsetY);
-                    }
-                }
-            );
-            shakeTimeline.getKeyFrames().add(keyFrame);
-        }
-        
-        shakeTimeline.play();
+        gameEffects.shakeBoard(gameBoard);
     }
 }
