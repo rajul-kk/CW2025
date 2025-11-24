@@ -19,8 +19,8 @@ public class Main extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(location, resources);
         Parent root = fxmlLoader.load();
 
-        primaryStage.setTitle("TetrisJFX");
-        Scene scene = new Scene(root, 600, 510);
+        primaryStage.setTitle(GameConstants.APP_TITLE);
+        Scene scene = new Scene(root, GameConstants.WINDOW_WIDTH, GameConstants.WINDOW_HEIGHT);
         primaryStage.setResizable(false);
         primaryStage.setScene(scene);
         primaryStage.show();

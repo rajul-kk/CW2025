@@ -17,9 +17,6 @@ import javafx.stage.StageStyle;
  */
 public class PauseMenuDialog {
     
-    private static final String CSS_PAUSE_MENU_BUTTON = "pause-menu-button";
-    private static final int MENU_WIDTH = 250;
-    private static final int MENU_HEIGHT = 350;
     
     private Stage pauseMenuStage;
     private final Stage ownerStage;
@@ -108,7 +105,7 @@ public class PauseMenuDialog {
     
     private Button createResumeButton() {
         Button resumeButton = new Button("Resume");
-        resumeButton.getStyleClass().add(CSS_PAUSE_MENU_BUTTON);
+        resumeButton.getStyleClass().add(GameConstants.CSS_PAUSE_MENU_BUTTON);
         resumeButton.setDefaultButton(true);
         resumeButton.setOnAction(e -> {
             close();
@@ -119,7 +116,7 @@ public class PauseMenuDialog {
     
     private Button createNewGameButton() {
         Button pauseNewGameButton = new Button("New Game");
-        pauseNewGameButton.getStyleClass().add(CSS_PAUSE_MENU_BUTTON);
+        pauseNewGameButton.getStyleClass().add(GameConstants.CSS_PAUSE_MENU_BUTTON);
         pauseNewGameButton.setOnAction(e -> {
             close();
             onNewGame.run();
@@ -129,7 +126,7 @@ public class PauseMenuDialog {
     
     private Button createControlsButton() {
         Button controlsButton = new Button("Controls");
-        controlsButton.getStyleClass().add(CSS_PAUSE_MENU_BUTTON);
+        controlsButton.getStyleClass().add(GameConstants.CSS_PAUSE_MENU_BUTTON);
         controlsButton.setOnAction(e -> {
             close();
             onShowControls.run();
@@ -139,7 +136,7 @@ public class PauseMenuDialog {
     
     private Button createExitButton() {
         Button pauseExitButton = new Button("Exit");
-        pauseExitButton.getStyleClass().add(CSS_PAUSE_MENU_BUTTON);
+        pauseExitButton.getStyleClass().add(GameConstants.CSS_PAUSE_MENU_BUTTON);
         pauseExitButton.setOnAction(e -> {
             close();
             onExit.run();
@@ -148,7 +145,7 @@ public class PauseMenuDialog {
     }
     
     private Scene createScene(VBox pauseMenu) {
-        Scene pauseScene = new Scene(pauseMenu, MENU_WIDTH, MENU_HEIGHT);
+        Scene pauseScene = new Scene(pauseMenu, GameConstants.PAUSE_MENU_WIDTH, GameConstants.PAUSE_MENU_HEIGHT);
         pauseScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
         pauseScene.getStylesheets().add(
             getClass().getClassLoader().getResource("window_style.css").toExternalForm()
@@ -176,8 +173,8 @@ public class PauseMenuDialog {
     }
     
     private void centerMenuOverOwner() {
-        pauseMenuStage.setX(ownerStage.getX() + (ownerStage.getWidth() - MENU_WIDTH) / 2);
-        pauseMenuStage.setY(ownerStage.getY() + (ownerStage.getHeight() - MENU_HEIGHT) / 2);
+        pauseMenuStage.setX(ownerStage.getX() + (ownerStage.getWidth() - GameConstants.PAUSE_MENU_WIDTH) / 2);
+        pauseMenuStage.setY(ownerStage.getY() + (ownerStage.getHeight() - GameConstants.PAUSE_MENU_HEIGHT) / 2);
     }
 }
 

@@ -4,7 +4,7 @@ import com.comp2042.logic.bricks.Brick;
 
 public class GameController implements InputEventListener {
 
-    private Board board = new SimpleBoard(25, 10);
+    private Board board = new SimpleBoard(GameConstants.BOARD_HEIGHT, GameConstants.BOARD_WIDTH);
 
     private final GuiController viewGuiController;
 

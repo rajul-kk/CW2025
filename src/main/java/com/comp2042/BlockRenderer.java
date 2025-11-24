@@ -17,10 +17,6 @@ import java.util.List;
  */
 public class BlockRenderer {
     
-    private static final int GAME_BRICK_SIZE = 20;
-    private static final int PREVIEW_BRICK_SIZE = 15;
-    private static final int HIDDEN_ROW_OFFSET = 2;
-    private static final int BOARD_WIDTH = 10;
     
     /**
      * Renders a block to a GridPane (for falling blocks and ghost blocks on the game board).
@@ -42,10 +38,10 @@ public class BlockRenderer {
         for (int i = 0; i < shape.length; i++) {
             for (int j = 0; j < shape[i].length; j++) {
                 if (shape[i][j] != 0) {
-                    Rectangle rectangle = createRectangle(shape[i][j], GAME_BRICK_SIZE, style);
+                    Rectangle rectangle = createRectangle(shape[i][j], GameConstants.BRICK_SIZE, style);
                     
                     int gridColumn = xPos + j;
-                    int gridRow = yPos + i - HIDDEN_ROW_OFFSET;
+                    int gridRow = yPos + i - GameConstants.HIDDEN_ROW_OFFSET;
                     
                     if (isValidGridPosition(gridRow, gridColumn)) {
                         gridPane.add(rectangle, gridColumn, gridRow);
@@ -72,15 +68,15 @@ public class BlockRenderer {
         
         pane.getChildren().clear();
         
-        int offsetX = (int) (pane.getPrefWidth() - shape[0].length * PREVIEW_BRICK_SIZE) / 2;
-        int offsetY = (int) (pane.getPrefHeight() - shape.length * PREVIEW_BRICK_SIZE) / 2;
+        int offsetX = (int) (pane.getPrefWidth() - shape[0].length * GameConstants.PREVIEW_BRICK_SIZE) / 2;
+        int offsetY = (int) (pane.getPrefHeight() - shape.length * GameConstants.PREVIEW_BRICK_SIZE) / 2;
         
         for (int i = 0; i < shape.length; i++) {
             for (int j = 0; j < shape[i].length; j++) {
                 if (shape[i][j] != 0) {
-                    Rectangle rectangle = createRectangle(shape[i][j], PREVIEW_BRICK_SIZE, style);
-                    rectangle.setLayoutX((double) offsetX + j * PREVIEW_BRICK_SIZE);
-                    rectangle.setLayoutY((double) offsetY + i * PREVIEW_BRICK_SIZE);
+                    Rectangle rectangle = createRectangle(shape[i][j], GameConstants.PREVIEW_BRICK_SIZE, style);
+                    rectangle.setLayoutX((double) offsetX + j * GameConstants.PREVIEW_BRICK_SIZE);
+                    rectangle.setLayoutY((double) offsetY + i * GameConstants.PREVIEW_BRICK_SIZE);
                     pane.getChildren().add(rectangle);
                 }
             }
@@ -133,7 +129,7 @@ public class BlockRenderer {
     }
     
     private boolean isValidGridPosition(int row, int column) {
-        return row >= 0 && column >= 0 && column < BOARD_WIDTH;
+        return row >= 0 && column >= 0 && column < GameConstants.BOARD_WIDTH;
     }
     
     /**

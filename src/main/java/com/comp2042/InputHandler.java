@@ -16,7 +16,6 @@ public class InputHandler implements EventHandler<KeyEvent> {
     private final Scene scene;
     
     private long lastDropTime = 0;
-    private static final long DROP_COOLDOWN = 300; // milliseconds
     
     /**
      * Creates a new InputHandler.
@@ -154,7 +153,7 @@ public class InputHandler implements EventHandler<KeyEvent> {
     
     private void handleHardDropKey() {
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastDropTime > DROP_COOLDOWN) {
+        if (currentTime - lastDropTime > GameConstants.DROP_COOLDOWN_MS) {
             lastDropTime = currentTime;
             if (gameController instanceof GameController gc) {
                 gc.dropInstant();

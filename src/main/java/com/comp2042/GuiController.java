@@ -12,20 +12,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.application.Platform;
 import javafx.scene.Parent;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
@@ -38,9 +33,6 @@ import java.util.ResourceBundle;
 
 public class GuiController implements Initializable {
 
-    private static final int BRICK_SIZE = 20;
-    private static final String CSS_CONTROLS_ITEM = "controls-item";
-    private static final String CSS_CONTROLS_SECTION_HEADER = "controls-section-header";
 
     @FXML
     private GridPane gamePanel;
@@ -87,6 +79,8 @@ public class GuiController implements Initializable {
     private Rectangle[][] displayMatrix;
     
     private PauseMenuDialog pauseMenuDialog;
+    
+    private ControlsDialog controlsDialog;
 
     private InputEventListener eventListener;
 
@@ -135,7 +129,7 @@ public class GuiController implements Initializable {
         displayMatrix = new Rectangle[boardMatrix.length][boardMatrix[0].length];
         for (int i = 2; i < boardMatrix.length; i++) {
             for (int j = 0; j < boardMatrix[i].length; j++) {
-                Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                Rectangle rectangle = new Rectangle(GameConstants.BRICK_SIZE, GameConstants.BRICK_SIZE);
                 rectangle.setFill(Color.TRANSPARENT);
                 displayMatrix[i][j] = rectangle;
                 gamePanel.add(rectangle, j, i - 2);
@@ -158,7 +152,7 @@ public class GuiController implements Initializable {
         }
 
         timeLine = new Timeline(new KeyFrame(
-                Duration.millis(400),
+                Duration.millis(GameConstants.GAME_TICK_DURATION_MS),
                 ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
         ));
         timeLine.setCycleCount(Animation.INDEFINITE);
@@ -432,117 +426,26 @@ public class GuiController implements Initializable {
 
     @FXML
     public void showControls(ActionEvent actionEvent) {
-        Stage primaryStage = (Stage) gamePanel.getScene().getWindow();
-        
-        VBox vbox = new VBox(6);
-        vbox.setAlignment(Pos.TOP_CENTER);
-        vbox.setPadding(new Insets(15));
-        vbox.getStyleClass().add("controls-dialog");
-        
-        // Title
-        Label titleLabel = new Label("GAME CONTROLS");
-        titleLabel.getStyleClass().add("controls-title");
-        
-        // Section headers
-        Label movementHeader = new Label("MOVEMENT:");
-        movementHeader.getStyleClass().add(CSS_CONTROLS_SECTION_HEADER);
-        
-        Label gameHeader = new Label("GAME CONTROLS:");
-        gameHeader.getStyleClass().add(CSS_CONTROLS_SECTION_HEADER);
-        
-        Label menuHeader = new Label("MENU SHORTCUTS:");
-        menuHeader.getStyleClass().add(CSS_CONTROLS_SECTION_HEADER);
-        
-        // Movement controls
-        Label leftControl = new Label("  Left Arrow / A  →  Move brick left");
-        leftControl.getStyleClass().add(CSS_CONTROLS_ITEM);
-        Label rightControl = new Label("  Right Arrow / D →  Move brick right");
-        rightControl.getStyleClass().add(CSS_CONTROLS_ITEM);
-        Label downControl = new Label("  Down Arrow / S  →  Move brick down (faster)");
-        downControl.getStyleClass().add(CSS_CONTROLS_ITEM);
-        Label hardDropControl = new Label("  Spacebar        →  Hard drop (instant drop)");
-        hardDropControl.getStyleClass().add(CSS_CONTROLS_ITEM);
-        Label rotateControl = new Label("  Up Arrow / W    →  Rotate brick");
-        rotateControl.getStyleClass().add(CSS_CONTROLS_ITEM);
-        Label holdControl = new Label("  C                →  Hold/swap brick");
-        holdControl.getStyleClass().add(CSS_CONTROLS_ITEM);
-        
-        // Game controls
-        Label pauseControl = new Label("  ESC              →  Pause/Resume game");
-        pauseControl.getStyleClass().add(CSS_CONTROLS_ITEM);
-        Label newGameControl = new Label("  N               →  New game");
-        newGameControl.getStyleClass().add(CSS_CONTROLS_ITEM);
-        
-        // Menu shortcuts
-        Label newGameShortcut = new Label("  Ctrl+N          →  New game");
-        newGameShortcut.getStyleClass().add(CSS_CONTROLS_ITEM);
-        Label exitShortcut = new Label("  Ctrl+Q          →  Exit game");
-        exitShortcut.getStyleClass().add(CSS_CONTROLS_ITEM);
-        
-        // Close button
-        Button closeButton = new Button("Close");
-        closeButton.getStyleClass().add("controls-close-button");
         // Check if game is paused before opening controls menu
         boolean wasPaused = isPause.getValue();
         
-        closeButton.setOnAction(e -> {
-            Stage stage = (Stage) closeButton.getScene().getWindow();
-            stage.close();
-            // If game was paused when controls opened, resume it when controls close
-            if (wasPaused) {
-                resumeGame();
-            }
-        });
+        // Close existing dialog if showing
+        if (controlsDialog != null && controlsDialog.isShowing()) {
+            controlsDialog.close();
+        }
         
-        vbox.getChildren().addAll(
-            titleLabel,
-            movementHeader,
-            leftControl, rightControl, downControl, hardDropControl, rotateControl, holdControl,
-            gameHeader,
-            pauseControl, newGameControl,
-            menuHeader,
-            newGameShortcut, exitShortcut,
-            new Label(""), // Spacer
-            closeButton
-        );
-        
-        Scene controlsScene = new Scene(vbox, 480, 520);
-        controlsScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
-        controlsScene.getStylesheets().add(getClass().getClassLoader().getResource("window_style.css").toExternalForm());
-        
-        // Allow ESC to close
-        controlsScene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ESCAPE) {
-                Stage stage = (Stage) controlsScene.getWindow();
-                stage.close();
-                // If game was paused when controls opened, resume it when controls close
+        // Create new dialog with current pause state
+        Stage primaryStage = (Stage) gamePanel.getScene().getWindow();
+        controlsDialog = new ControlsDialog(
+            primaryStage,
+            () -> {
                 if (wasPaused) {
                     resumeGame();
                 }
             }
-        });
+        );
         
-        Stage controlsStage = new Stage();
-        controlsStage.initOwner(primaryStage);
-        controlsStage.initModality(Modality.WINDOW_MODAL);
-        controlsStage.initStyle(StageStyle.TRANSPARENT);
-        controlsStage.setTitle("Game Controls");
-        controlsStage.setScene(controlsScene);
-        
-        // Handle window close event (X button)
-        controlsStage.setOnCloseRequest(e -> {
-            // If game was paused when controls opened, resume it when controls close
-            if (wasPaused) {
-                resumeGame();
-            }
-        });
-        
-        // Center the controls window over the game window
-        controlsStage.setX(primaryStage.getX() + (primaryStage.getWidth() - 480) / 2);
-        controlsStage.setY(primaryStage.getY() + (primaryStage.getHeight() - 520) / 2);
-        
-        controlsStage.show();
-        controlsStage.requestFocus();
+        controlsDialog.show();
     }
 
     @FXML
@@ -585,7 +488,7 @@ public class GuiController implements Initializable {
             Parent root = fxmlLoader.load();
             
             // Create and set the main menu scene
-            Scene menuScene = new Scene(root, 600, 510);
+            Scene menuScene = new Scene(root, GameConstants.WINDOW_WIDTH, GameConstants.WINDOW_HEIGHT);
             stage.setScene(menuScene);
         } catch (Exception e) {
             e.printStackTrace();

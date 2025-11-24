@@ -31,7 +31,7 @@ public class MenuController {
             GuiController guiController = fxmlLoader.getController();
             
             // Create and set the game scene
-            Scene gameScene = new Scene(root, 600, 510);
+            Scene gameScene = new Scene(root, GameConstants.WINDOW_WIDTH, GameConstants.WINDOW_HEIGHT);
             stage.setScene(gameScene);
             
             // Initialize the game controller
