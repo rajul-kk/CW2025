@@ -21,10 +21,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 
@@ -76,7 +73,7 @@ public class GuiController implements Initializable {
     @FXML
     private Pane holdBlockPane;
 
-    private Rectangle[][] displayMatrix;
+    private BoardDisplayManager boardDisplayManager;
     
     private PauseMenuDialog pauseMenuDialog;
     
@@ -95,7 +92,6 @@ public class GuiController implements Initializable {
     private final GameEffects gameEffects = new GameEffects();
 
     private java.util.List<javafx.scene.Node> currentFallingBlockNodes = new java.util.ArrayList<>();
-    private java.util.List<javafx.scene.Node> currentGhostNodes = new java.util.ArrayList<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -126,15 +122,12 @@ public class GuiController implements Initializable {
 
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
-        displayMatrix = new Rectangle[boardMatrix.length][boardMatrix[0].length];
-        for (int i = 2; i < boardMatrix.length; i++) {
-            for (int j = 0; j < boardMatrix[i].length; j++) {
-                Rectangle rectangle = new Rectangle(GameConstants.BRICK_SIZE, GameConstants.BRICK_SIZE);
-                rectangle.setFill(Color.TRANSPARENT);
-                displayMatrix[i][j] = rectangle;
-                gamePanel.add(rectangle, j, i - 2);
-            }
-        }
+        // Initialize board display manager
+        boardDisplayManager = new BoardDisplayManager(gamePanel);
+        boardDisplayManager.initialize(boardMatrix);
+
+        // Initialize ghost block management in BlockRenderer
+        blockRenderer.initializeGhostManagement(gamePanel);
 
         // Initialize falling block
         updateFallingBlock(brick);
@@ -159,20 +152,13 @@ public class GuiController implements Initializable {
         timeLine.play();
     }
 
-    private Paint getFillColor(int i) {
-        return BlockRenderer.getFillColor(i);
-    }
-    
-    private Color getBorderColor(int i) {
-        return BlockRenderer.getBorderColor(i);
-    }
 
 
     public void refreshBrick(ViewData brick) {
         if (brick == null) {
             // Clear falling block and ghost if no brick data (e.g., game over)
             clearFallingBlock();
-            clearGhost();
+            blockRenderer.clearGhost();
             return;
         }
         
@@ -184,11 +170,11 @@ public class GuiController implements Initializable {
             if (eventListener instanceof GameController gameController) {
                 int ghostY = gameController.calculateGhostY();
                 Block currentBlock = new Block(brick.getBrickData());
-                drawGhost(currentBlock, brick.getxPosition(), ghostY);
+                blockRenderer.drawGhost(currentBlock, brick.getxPosition(), ghostY);
             }
         } else {
             // Clear ghost when paused
-            clearGhost();
+            blockRenderer.clearGhost();
         }
     }
     
@@ -207,7 +193,7 @@ public class GuiController implements Initializable {
         currentFallingBlockNodes.clear();
         
         // Clear ghost when updating falling block
-        clearGhost();
+        blockRenderer.clearGhost();
         
         int xPos = brick.getxPosition();
         int yPos = brick.getyPosition();
@@ -218,59 +204,12 @@ public class GuiController implements Initializable {
                                        currentFallingBlockNodes, BlockRenderer.BlockStyle.NORMAL);
     }
 
-    /**
-     * Draws a ghost piece (outline with dotted border) showing where the block will land.
-     * @param block The block shape to draw
-     * @param xPos The X position of the block
-     * @param ghostY The Y position where the ghost should appear (calculated landing position)
-     */
-    public void drawGhost(Block block, int xPos, int ghostY) {
-        // Remove old ghost nodes
-        clearGhost();
-        
-        if (block == null) {
-            return;
-        }
-        
-        int[][] shape = block.getShape();
-        
-        // Use BlockRenderer to render the ghost block
-        blockRenderer.renderToGridPane(shape, xPos, ghostY, gamePanel, 
-                                      currentGhostNodes, BlockRenderer.BlockStyle.GHOST);
-    }
-
-    /**
-     * Clears the ghost piece from the display.
-     */
-    private void clearGhost() {
-        for (javafx.scene.Node node : currentGhostNodes) {
-            gamePanel.getChildren().remove(node);
-        }
-        currentGhostNodes.clear();
-    }
-
     public void refreshGameBackground(int[][] board) {
         // Clear ghost when background refreshes (block locked)
-        clearGhost();
+        blockRenderer.clearGhost();
         
-        for (int i = 2; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                setRectangleData(board[i][j], displayMatrix[i][j]);
-            }
-        }
-    }
-
-    private void setRectangleData(int color, Rectangle rectangle) {
-        if (color == 0) {
-            rectangle.setFill(Color.TRANSPARENT);
-            rectangle.setStroke(null);
-        } else {
-            rectangle.setFill(getFillColor(color));
-            rectangle.setStroke(getBorderColor(color));
-            rectangle.setStrokeType(StrokeType.INSIDE);
-            rectangle.setStrokeWidth(1.5);
-            rectangle.setArcHeight(9);
-            rectangle.setArcWidth(9);
+        if (boardDisplayManager != null) {
+            boardDisplayManager.refreshGameBackground(board);
         }
     }
 
@@ -294,17 +233,7 @@ public class GuiController implements Initializable {
             NotificationPanel notificationPanel = new NotificationPanel("+" + clearRow.getScoreBonus());
             
             // Center the notification over the gameboard
-            if (gameBoard != null && groupNotification != null && groupNotification.getScene() != null) {
-                // Get the gameboard's bounds in the scene
-                javafx.geometry.Bounds gameBoardBounds = gameBoard.localToScene(gameBoard.getBoundsInLocal());
-                // Calculate center position in scene coordinates
-                double centerXScene = gameBoardBounds.getMinX() + gameBoardBounds.getWidth() / 2 - notificationPanel.getMinWidth() / 2;
-                double centerYScene = gameBoardBounds.getMinY() + gameBoardBounds.getHeight() / 2 - notificationPanel.getMinHeight() / 2;
-                // Convert scene coordinates to groupNotification's local coordinates
-                javafx.geometry.Point2D localPoint = groupNotification.sceneToLocal(centerXScene, centerYScene);
-                notificationPanel.setLayoutX(localPoint.getX());
-                notificationPanel.setLayoutY(localPoint.getY());
-            }
+            notificationPanel.centerOverGameBoard(gameBoard, groupNotification);
             
             if (groupNotification != null) {
                 groupNotification.getChildren().add(notificationPanel);
@@ -537,7 +466,12 @@ public class GuiController implements Initializable {
      * @param viewData The ViewData containing the block's position and shape data
      */
     public void animateLockBlock(ViewData viewData) {
-        if (viewData == null || displayMatrix == null) {
+        if (viewData == null || boardDisplayManager == null) {
+            return;
+        }
+
+        Rectangle[][] displayMatrix = boardDisplayManager.getDisplayMatrix();
+        if (displayMatrix == null) {
             return;
         }
 

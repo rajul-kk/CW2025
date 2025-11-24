@@ -1,5 +1,6 @@
 package com.comp2042;
 
+import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -9,6 +10,7 @@ import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,6 +18,9 @@ import java.util.List;
  * Handles drawing falling blocks, ghost blocks, and preview blocks.
  */
 public class BlockRenderer {
+    
+    private final List<Node> ghostNodes = new ArrayList<>();
+    private GridPane ghostGridPane;
     
     
     /**
@@ -228,6 +233,57 @@ public class BlockRenderer {
             default:
                 return Color.WHITE;
         }
+    }
+    
+    /**
+     * Initializes ghost block management with the GridPane to render to.
+     * Must be called before using ghost block methods.
+     * 
+     * @param gridPane The GridPane where ghost blocks will be rendered
+     */
+    public void initializeGhostManagement(GridPane gridPane) {
+        this.ghostGridPane = gridPane;
+        clearGhost();
+    }
+    
+    /**
+     * Draws a ghost piece (outline with dotted border) showing where the block will land.
+     * Automatically clears any existing ghost before drawing the new one.
+     * 
+     * @param block The block shape to draw
+     * @param xPos The X position of the block
+     * @param ghostY The Y position where the ghost should appear (calculated landing position)
+     */
+    public void drawGhost(Block block, int xPos, int ghostY) {
+        if (ghostGridPane == null) {
+            return; // Ghost management not initialized
+        }
+        
+        // Remove old ghost nodes
+        clearGhost();
+        
+        if (block == null) {
+            return;
+        }
+        
+        int[][] shape = block.getShape();
+        
+        // Render the ghost block
+        renderToGridPane(shape, xPos, ghostY, ghostGridPane, ghostNodes, BlockStyle.GHOST);
+    }
+    
+    /**
+     * Clears the ghost piece from the display.
+     */
+    public void clearGhost() {
+        if (ghostGridPane == null) {
+            return; // Ghost management not initialized
+        }
+        
+        for (Node node : ghostNodes) {
+            ghostGridPane.getChildren().remove(node);
+        }
+        ghostNodes.clear();
     }
     
     /**
