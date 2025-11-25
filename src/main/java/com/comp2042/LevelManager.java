@@ -17,10 +17,7 @@ public class LevelManager {
     private static final int INITIAL_DROP_INTERVAL = 1000;
     
     /** Minimum drop interval in milliseconds (maximum speed) */
-    private static final int MIN_DROP_INTERVAL = 100;
-    
-    /** Drop interval reduction per level in milliseconds */
-    private static final int DROP_INTERVAL_REDUCTION_PER_LEVEL = 100;
+    private static final int MIN_DROP_INTERVAL = 10;
     
     /**
      * Creates a new LevelManager with initial values.
@@ -71,12 +68,19 @@ public class LevelManager {
     }
     
     /**
-     * Calculates the drop interval based on the current level.
+     * Calculates the drop interval based on the current level using the Modern Tetris Guideline formula.
+     * This formula is exponential, making the game start slow but get fast very quickly.
      * @param currentLevel The current level
      * @return The drop interval in milliseconds
      */
     private int calculateDropInterval(int currentLevel) {
-        int calculatedInterval = INITIAL_DROP_INTERVAL - ((currentLevel - 1) * DROP_INTERVAL_REDUCTION_PER_LEVEL);
+        // Modern Tetris Guideline formula: seconds = (0.8 - ((level - 1) * 0.01))^(level - 1)
+        double seconds = Math.pow((0.8 - ((currentLevel - 1) * 0.01)), (currentLevel - 1));
+        
+        // Convert to milliseconds
+        int calculatedInterval = (int) (seconds * 1000);
+        
+        // Clamp to minimum to prevent game loop from breaking
         return Math.max(MIN_DROP_INTERVAL, calculatedInterval);
     }
     
@@ -107,34 +111,11 @@ public class LevelManager {
     /**
      * Result object containing level update information.
      */
-    public static class LevelUpdateResult {
-        private final int level;
-        private final int totalLinesCleared;
-        private final int dropInterval;
-        private final boolean levelIncreased;
-        
-        public LevelUpdateResult(int level, int totalLinesCleared, int dropInterval, boolean levelIncreased) {
-            this.level = level;
-            this.totalLinesCleared = totalLinesCleared;
-            this.dropInterval = dropInterval;
-            this.levelIncreased = levelIncreased;
-        }
-        
-        public int getLevel() {
-            return level;
-        }
-        
-        public int getTotalLinesCleared() {
-            return totalLinesCleared;
-        }
-        
-        public int getDropInterval() {
-            return dropInterval;
-        }
-        
-        public boolean isLevelIncreased() {
-            return levelIncreased;
-        }
-    }
+    public record LevelUpdateResult(
+        int level,
+        int totalLinesCleared,
+        int dropInterval,
+        boolean levelIncreased
+    ) {}
 }
 

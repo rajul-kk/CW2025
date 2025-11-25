@@ -114,10 +114,10 @@ public class GameController implements InputEventListener {
                 
                 // Update level system
                 LevelManager.LevelUpdateResult levelUpdate = levelManager.addLinesCleared(clearRow.getLinesRemoved());
-                viewGuiController.updateLines(levelUpdate.getTotalLinesCleared());
-                if (levelUpdate.isLevelIncreased()) {
-                    viewGuiController.updateLevel(levelUpdate.getLevel());
-                    viewGuiController.updateGameSpeed(levelUpdate.getDropInterval());
+                viewGuiController.updateLines(levelUpdate.totalLinesCleared());
+                if (levelUpdate.levelIncreased()) {
+                    viewGuiController.updateLevel(levelUpdate.level());
+                    viewGuiController.updateGameSpeed(levelUpdate.dropInterval());
                 }
             }
             
@@ -290,10 +290,10 @@ public class GameController implements InputEventListener {
             
             // Update level system
             LevelManager.LevelUpdateResult levelUpdate = levelManager.addLinesCleared(clearRow.getLinesRemoved());
-            viewGuiController.updateLines(levelUpdate.getTotalLinesCleared());
-            if (levelUpdate.isLevelIncreased()) {
-                viewGuiController.updateLevel(levelUpdate.getLevel());
-                viewGuiController.updateGameSpeed(levelUpdate.getDropInterval());
+            viewGuiController.updateLines(levelUpdate.totalLinesCleared());
+            if (levelUpdate.levelIncreased()) {
+                viewGuiController.updateLevel(levelUpdate.level());
+                viewGuiController.updateGameSpeed(levelUpdate.dropInterval());
             }
         }
         
