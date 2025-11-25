@@ -6,7 +6,10 @@ import javafx.animation.TranslateTransition;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.effect.Effect;
 import javafx.scene.effect.Glow;
@@ -27,10 +30,36 @@ public class NotificationPanel extends BorderPane {
         setCenter(score);
 
     }
+    
+    /**
+     * Centers this notification panel over the specified game board.
+     * Calculates the center position relative to the game board and positions
+     * the notification in the notification group's local coordinate space.
+     * 
+     * @param gameBoard The game board BorderPane to center over
+     * @param notificationGroup The Parent (Group/Pane) where the notification will be added
+     */
+    public void centerOverGameBoard(javafx.scene.layout.BorderPane gameBoard, Parent notificationGroup) {
+        if (gameBoard == null || notificationGroup == null || notificationGroup.getScene() == null) {
+            return;
+        }
+        
+        // Get the gameboard's bounds in the scene
+        Bounds gameBoardBounds = gameBoard.localToScene(gameBoard.getBoundsInLocal());
+        
+        // Calculate center position in scene coordinates
+        double centerXScene = gameBoardBounds.getMinX() + gameBoardBounds.getWidth() / 2 - this.getMinWidth() / 2;
+        double centerYScene = gameBoardBounds.getMinY() + gameBoardBounds.getHeight() / 2 - this.getMinHeight() / 2;
+        
+        // Convert scene coordinates to notificationGroup's local coordinates
+        Point2D localPoint = notificationGroup.sceneToLocal(centerXScene, centerYScene);
+        this.setLayoutX(localPoint.getX());
+        this.setLayoutY(localPoint.getY());
+    }
 
     public void showScore(ObservableList<Node> list) {
         FadeTransition ft = new FadeTransition(Duration.millis(2000), this);
-        TranslateTransition tt = new TranslateTransition(Duration.millis(2500), this);
+        TranslateTransition tt = new TranslateTransition(Duration.millis(GameConstants.NOTIFICATION_DURATION_MS), this);
         tt.setToY(this.getLayoutY() - 40);
         ft.setFromValue(1);
         ft.setToValue(0);

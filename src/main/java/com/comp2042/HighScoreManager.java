@@ -8,14 +8,13 @@ import java.util.Scanner;
 
 public class HighScoreManager {
     
-    private static final String HIGHSCORE_FILE = "highscore.txt";
     
     /**
      * Loads the high score from the file.
      * @return The high score, or 0 if the file doesn't exist or has an error
      */
     public static int loadHighScore() {
-        File file = new File(HIGHSCORE_FILE);
+        File file = new File(GameConstants.HIGHSCORE_FILE);
         
         if (!file.exists()) {
             return 0;
@@ -41,7 +40,7 @@ public class HighScoreManager {
      * @param score The score to save
      */
     public static void saveHighScore(int score) {
-        try (FileWriter writer = new FileWriter(HIGHSCORE_FILE)) {
+            try (FileWriter writer = new FileWriter(GameConstants.HIGHSCORE_FILE)) {
             writer.write(String.valueOf(score));
         } catch (IOException e) {
             // If saving fails, we can't do much about it
