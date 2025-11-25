@@ -46,6 +46,10 @@
 
                     <Label fx:id="highScoreLabel" text="0" styleClass="scoreClass"/>
 
+                    <Label text="LINES" styleClass="nextBrickLabel"/>
+
+                    <Label fx:id="linesLabel" text="0" styleClass="scoreClass"/>
+
                 </children>
 
             </VBox>
@@ -123,6 +127,10 @@
                     <Label text="SCORE" styleClass="nextBrickLabel"/>
 
                     <Label fx:id="scoreLabel" text="000000" styleClass="scoreClass"/>
+
+                    <Label text="LEVEL" styleClass="nextBrickLabel"/>
+
+                    <Label fx:id="levelLabel" text="1" styleClass="scoreClass"/>
 
                     <Label text="NEXT " styleClass="nextBrickLabel"/>
 

@@ -10,12 +10,7 @@
            alignment="CENTER">
     
     <children>
-        <VBox spacing="30" alignment="CENTER" styleClass="menu-background"
-              maxWidth="400" maxHeight="350">
-            <padding>
-                <Insets top="40" right="40" bottom="40" left="40"/>
-            </padding>
-            
+        <VBox spacing="30" alignment="CENTER">
             <children>
                 <Label fx:id="titleLabel" text="TETRIS" styleClass="arcadeTitle"/>
                 

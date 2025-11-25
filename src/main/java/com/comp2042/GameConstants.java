@@ -17,7 +17,7 @@ public final class GameConstants {
     public static final int WINDOW_WIDTH = 600;
     
     /** Main application window height */
-    public static final int WINDOW_HEIGHT = 510;
+    public static final int WINDOW_HEIGHT = 560;
     
     /** Pause menu dialog width */
     public static final int PAUSE_MENU_WIDTH = 250;

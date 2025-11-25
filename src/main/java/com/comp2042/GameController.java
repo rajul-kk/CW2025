@@ -19,6 +19,8 @@ public class GameController implements InputEventListener {
     private boolean canHold = true;
     
     private int highScore = 0;
+    
+    private final LevelManager levelManager = new LevelManager();
 
     public GameController(GuiController c) {
         viewGuiController = c;
@@ -36,6 +38,10 @@ public class GameController implements InputEventListener {
         heldBrick = null;
         heldRotation = 0;
         canHold = true;
+        
+        // Initialize level system
+        levelManager.reset();
+        updateLevelDisplay();
     }
     
     /**
@@ -48,6 +54,15 @@ public class GameController implements InputEventListener {
             viewGuiController.updateHighScore(highScore);
             HighScoreManager.saveHighScore(highScore);
         }
+    }
+    
+    /**
+     * Updates the GUI with current level, lines, and game speed from LevelManager.
+     */
+    private void updateLevelDisplay() {
+        viewGuiController.updateLevel(levelManager.getLevel());
+        viewGuiController.updateLines(levelManager.getTotalLinesCleared());
+        viewGuiController.updateGameSpeed(levelManager.getDropInterval());
     }
 
     /**
@@ -96,6 +111,14 @@ public class GameController implements InputEventListener {
             if (clearRow.getLinesRemoved() > 0) {
                 board.getScore().add(clearRow.getScoreBonus());
                 checkAndUpdateHighScore();
+                
+                // Update level system
+                LevelManager.LevelUpdateResult levelUpdate = levelManager.addLinesCleared(clearRow.getLinesRemoved());
+                viewGuiController.updateLines(levelUpdate.getTotalLinesCleared());
+                if (levelUpdate.isLevelIncreased()) {
+                    viewGuiController.updateLevel(levelUpdate.getLevel());
+                    viewGuiController.updateGameSpeed(levelUpdate.getDropInterval());
+                }
             }
             
             // Refresh background to show locked blocks before checking for game over
@@ -186,6 +209,10 @@ public class GameController implements InputEventListener {
         heldRotation = 0;
         canHold = true;
         viewGuiController.drawHoldBlock(null); // Clear hold box
+        
+        // Reset level system
+        levelManager.reset();
+        updateLevelDisplay();
     }
 
     private void refreshBlockReferences() {
@@ -260,6 +287,14 @@ public class GameController implements InputEventListener {
             checkAndUpdateHighScore();
             // Show the score notification popup
             viewGuiController.showScoreNotification(clearRow);
+            
+            // Update level system
+            LevelManager.LevelUpdateResult levelUpdate = levelManager.addLinesCleared(clearRow.getLinesRemoved());
+            viewGuiController.updateLines(levelUpdate.getTotalLinesCleared());
+            if (levelUpdate.isLevelIncreased()) {
+                viewGuiController.updateLevel(levelUpdate.getLevel());
+                viewGuiController.updateGameSpeed(levelUpdate.getDropInterval());
+            }
         }
         
         // Refresh background to show locked blocks before checking for game over

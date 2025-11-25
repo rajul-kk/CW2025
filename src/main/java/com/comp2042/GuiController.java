@@ -45,6 +45,12 @@ public class GuiController implements Initializable {
     private Label highScoreLabel;
 
     @FXML
+    private Label linesLabel;
+
+    @FXML
+    private Label levelLabel;
+
+    @FXML
     private VBox gameOverScreen;
 
     @FXML
@@ -101,6 +107,12 @@ public class GuiController implements Initializable {
             }
             if (highScoreLabel != null) {
                 highScoreLabel.setFont(FontLoader.getFont(38));
+            }
+            if (linesLabel != null) {
+                linesLabel.setFont(FontLoader.getFont(38));
+            }
+            if (levelLabel != null) {
+                levelLabel.setFont(FontLoader.getFont(38));
             }
         }
         
@@ -263,6 +275,39 @@ public class GuiController implements Initializable {
     public void updateHighScore(int score) {
         if (highScoreLabel != null) {
             highScoreLabel.setText(String.valueOf(score));
+        }
+    }
+
+    public void updateLines(int lines) {
+        if (linesLabel != null) {
+            linesLabel.setText(String.valueOf(lines));
+        }
+    }
+
+    public void updateLevel(int level) {
+        if (levelLabel != null) {
+            levelLabel.setText(String.valueOf(level));
+        }
+    }
+
+    /**
+     * Updates the game speed by changing the drop interval.
+     * @param dropInterval The new drop interval in milliseconds
+     */
+    public void updateGameSpeed(int dropInterval) {
+        if (timeLine != null) {
+            boolean wasPlaying = timeLine.getStatus() == javafx.animation.Animation.Status.RUNNING;
+            timeLine.stop();
+            
+            timeLine = new Timeline(new KeyFrame(
+                    Duration.millis(dropInterval),
+                    ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
+            ));
+            timeLine.setCycleCount(Animation.INDEFINITE);
+            
+            if (wasPlaying && !isPause.get()) {
+                timeLine.play();
+            }
         }
     }
 
