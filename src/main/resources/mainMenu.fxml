@@ -17,7 +17,7 @@
             </padding>
             
             <children>
-                <Label text="TETRIS" styleClass="arcadeTitle"/>
+                <Label fx:id="titleLabel" text="TETRIS" styleClass="arcadeTitle"/>
                 
                 <Button fx:id="startButton" text="Start Game" 
                         styleClass="controlButton" 

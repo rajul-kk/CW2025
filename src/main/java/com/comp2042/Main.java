@@ -13,6 +13,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        // Load the digital font before creating any UI elements
+        FontLoader.loadFont();
 
         URL location = getClass().getClassLoader().getResource("mainMenu.fxml");
         ResourceBundle resources = null;

@@ -18,7 +18,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 import java.net.URL;
@@ -91,7 +90,20 @@ public class GuiController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Font.loadFont(getClass().getClassLoader().getResource("digital.ttf").toExternalForm(), 38);
+        // Load font using FontLoader (font is already loaded in Main, but ensure it's available)
+        FontLoader.loadFont();
+        
+        // Apply digital font to score labels using FontLoader
+        String fontFamily = FontLoader.getFontFamily();
+        if (fontFamily != null && !fontFamily.equals("System")) {
+            if (scoreLabel != null) {
+                scoreLabel.setFont(FontLoader.getFont(38));
+            }
+            if (highScoreLabel != null) {
+                highScoreLabel.setFont(FontLoader.getFont(38));
+            }
+        }
+        
         gamePanel.setFocusTraversable(true);
         gamePanel.requestFocus();
         if (gameOverScreen != null) {

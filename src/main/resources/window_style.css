@@ -142,7 +142,7 @@
 }
 
 .scoreClass{
-    -fx-font-family: "Courier New", "Consolas", "Monaco", monospace;
+    -fx-font-family: "Let's go Digital";
     -fx-font-size: 38;
     -fx-fill: #FFFF00;
     -fx-text-fill: #FFFF00;
@@ -178,9 +178,11 @@
 }
 
 .pause-menu-button {
+    -fx-font-family: "Let's go Digital";
     -fx-font-size: 16px;
     -fx-pref-width: 150px;
     -fx-pref-height: 35px;
+    -fx-text-fill: #3399FF;
 }
 
 /* Controls Dialog Styles */
@@ -199,7 +201,7 @@
 }
 
 .controls-section-header {
-    -fx-font-family: "Let's go Digital";
+    -fx-font-family: "Arial", "Helvetica", sans-serif;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-padding: 8 0 4 0;
@@ -207,7 +209,7 @@
 }
 
 .controls-item {
-    -fx-font-family: "Let's go Digital";
+    -fx-font-family: "Arial", "Helvetica", sans-serif;
     -fx-font-size: 12px;
     -fx-padding: 1 0;
     -fx-text-fill: #00FFFF;
