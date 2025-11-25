@@ -22,6 +22,21 @@ public class BlockRenderer {
     private final List<Node> ghostNodes = new ArrayList<>();
     private GridPane ghostGridPane;
     
+    /**
+     * Context object for rendering operations to reduce parameter count.
+     */
+    private static class RenderingContext {
+        final GridPane gridPane;
+        final List<javafx.scene.Node> nodeList;
+        final BlockStyle style;
+        
+        RenderingContext(GridPane gridPane, List<javafx.scene.Node> nodeList, BlockStyle style) {
+            this.gridPane = gridPane;
+            this.nodeList = nodeList;
+            this.style = style;
+        }
+    }
+    
     
     /**
      * Renders a block to a GridPane (for falling blocks and ghost blocks on the game board).
@@ -40,21 +55,51 @@ public class BlockRenderer {
             return;
         }
         
+        RenderingContext context = new RenderingContext(gridPane, nodeList, style);
         for (int i = 0; i < shape.length; i++) {
-            for (int j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] != 0) {
-                    Rectangle rectangle = createRectangle(shape[i][j], GameConstants.BRICK_SIZE, style);
-                    
-                    int gridColumn = xPos + j;
-                    int gridRow = yPos + i - GameConstants.HIDDEN_ROW_OFFSET;
-                    
-                    if (isValidGridPosition(gridRow, gridColumn)) {
-                        gridPane.add(rectangle, gridColumn, gridRow);
-                        if (nodeList != null) {
-                            nodeList.add(rectangle);
-                        }
-                    }
-                }
+            renderRowToGridPane(shape[i], i, xPos, yPos, context);
+        }
+    }
+    
+    /**
+     * Renders a single row of the block shape to the GridPane.
+     * 
+     * @param row The row data from the shape array
+     * @param rowIndex The index of the row in the shape
+     * @param xPos The X position on the board
+     * @param yPos The Y position on the board
+     * @param context The rendering context containing gridPane, nodeList, and style
+     */
+    private void renderRowToGridPane(int[] row, int rowIndex, int xPos, int yPos,
+                                     RenderingContext context) {
+        for (int j = 0; j < row.length; j++) {
+            if (row[j] != 0) {
+                renderCellToGridPane(row[j], rowIndex, j, xPos, yPos, context);
+            }
+        }
+    }
+    
+    /**
+     * Renders a single cell of the block to the GridPane.
+     * 
+     * @param colorCode The color code for the cell
+     * @param rowIndex The row index in the shape
+     * @param colIndex The column index in the shape
+     * @param xPos The X position on the board
+     * @param yPos The Y position on the board
+     * @param context The rendering context containing gridPane, nodeList, and style
+     */
+    private void renderCellToGridPane(int colorCode, int rowIndex, int colIndex, int xPos, int yPos,
+                                      RenderingContext context) {
+        Rectangle rectangle = createRectangle(colorCode, GameConstants.BRICK_SIZE, context.style);
+        
+        int gridColumn = xPos + colIndex;
+        int gridRow = yPos + rowIndex - GameConstants.HIDDEN_ROW_OFFSET;
+        
+        if (isValidGridPosition(gridRow, gridColumn)) {
+            context.gridPane.add(rectangle, gridColumn, gridRow);
+            if (context.nodeList != null) {
+                context.nodeList.add(rectangle);
             }
         }
     }
@@ -94,12 +139,10 @@ public class BlockRenderer {
     private Rectangle createRectangle(int colorCode, int size, BlockStyle style) {
         Rectangle rectangle = new Rectangle(size, size);
         
-        if (style == BlockStyle.GHOST) {
-            configureGhostStyle(rectangle);
-        } else if (style == BlockStyle.PREVIEW) {
-            configurePreviewStyle(rectangle, colorCode);
-        } else { // NORMAL
-            configureNormalStyle(rectangle, colorCode);
+        switch (style) {
+            case GHOST -> configureGhostStyle(rectangle);
+            case PREVIEW -> configurePreviewStyle(rectangle, colorCode);
+            case NORMAL -> configureNormalStyle(rectangle, colorCode);
         }
         
         return rectangle;

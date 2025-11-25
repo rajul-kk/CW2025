@@ -8,12 +8,8 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.application.Platform;
-import javafx.scene.Parent;
 import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -134,7 +130,7 @@ public class GuiController implements Initializable {
 
         // Initialize pause menu dialog
         if (pauseMenuDialog == null) {
-            Stage primaryStage = (Stage) gamePanel.getScene().getWindow();
+            Stage primaryStage = SceneManager.getStage(gamePanel);
             pauseMenuDialog = new PauseMenuDialog(
                 primaryStage,
                 this::resumeGame,
@@ -364,7 +360,7 @@ public class GuiController implements Initializable {
         }
         
         // Create new dialog with current pause state
-        Stage primaryStage = (Stage) gamePanel.getScene().getWindow();
+        Stage primaryStage = SceneManager.getStage(gamePanel);
         controlsDialog = new ControlsDialog(
             primaryStage,
             () -> {
@@ -399,30 +395,18 @@ public class GuiController implements Initializable {
     }
     
     private void returnToMainMenu() {
-        try {
-            // Stop the game timeline if running
-            if (timeLine != null) {
-                timeLine.stop();
-            }
-            
-            // Close pause menu if open
-            closePauseMenu();
-            
-            // Get the current stage
-            Stage stage = (Stage) gamePanel.getScene().getWindow();
-            
-            // Load the main menu
-            URL location = getClass().getClassLoader().getResource("mainMenu.fxml");
-            FXMLLoader fxmlLoader = new FXMLLoader(location);
-            Parent root = fxmlLoader.load();
-            
-            // Create and set the main menu scene
-            Scene menuScene = new Scene(root, GameConstants.WINDOW_WIDTH, GameConstants.WINDOW_HEIGHT);
-            stage.setScene(menuScene);
-        } catch (Exception e) {
-            e.printStackTrace();
+        // Stop the game timeline if running
+        if (timeLine != null) {
+            timeLine.stop();
+        }
+        
+        // Close pause menu if open
+        closePauseMenu();
+        
+        // Switch to main menu scene using SceneManager
+        if (!SceneManager.switchToMainMenu(gamePanel, getClass())) {
             // Fallback to exit if menu loading fails
-            Platform.exit();
+            SceneManager.handleTransitionError();
         }
     }
 
