@@ -93,6 +93,8 @@ public class GuiController implements Initializable {
     private final GameEffects gameEffects = new GameEffects();
 
     private java.util.List<javafx.scene.Node> currentFallingBlockNodes = new java.util.ArrayList<>();
+    
+    private final PhantomManager phantomManager = new PhantomManager();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -144,6 +146,7 @@ public class GuiController implements Initializable {
     public void initGameView(int[][] boardMatrix, ViewData brick) {
         // Initialize board display manager
         boardDisplayManager = new BoardDisplayManager(gamePanel);
+        boardDisplayManager.setGuiController(this);
         boardDisplayManager.initialize(boardMatrix);
 
         // Initialize ghost block management in BlockRenderer
@@ -529,5 +532,72 @@ public class GuiController implements Initializable {
      */
     public void shakeBoard() {
         gameEffects.shakeBoard(gameBoard);
+    }
+
+    /**
+     * Sets whether phantom mode is enabled.
+     * In phantom mode, blocks fade to near-invisibility after locking.
+     * 
+     * @param enabled true to enable phantom mode, false to disable
+     */
+    public void setPhantomMode(boolean enabled) {
+        phantomManager.setPhantomMode(enabled);
+    }
+
+    /**
+     * Checks if phantom mode is enabled.
+     * 
+     * @return true if phantom mode is enabled, false otherwise
+     */
+    public boolean isPhantomMode() {
+        return phantomManager.isPhantomMode();
+    }
+    
+    /**
+     * Public method to trigger phantom fade on a rectangle.
+     * Called from BoardDisplayManager when a block locks.
+     * 
+     * @param rectangle The rectangle to fade
+     */
+    public void fadeLockedBlock(Rectangle rectangle) {
+        phantomManager.fadeLockedBlock(rectangle);
+    }
+    
+    /**
+     * Flashes all visible blocks on the board for 0.2 seconds.
+     * Used when rows are cleared to help the player re-orient themselves.
+     */
+    public void flashAllBlocks() {
+        if (boardDisplayManager == null) {
+            return;
+        }
+        
+        Rectangle[][] displayMatrix = boardDisplayManager.getDisplayMatrix();
+        if (displayMatrix == null) {
+            return;
+        }
+        
+        gameEffects.flashAllBlocks(displayMatrix, rect -> phantomManager.applyPostFlashEffect(rect));
+    }
+    
+    /**
+     * Illuminates a 2x2 radius around the given position for 0.2 seconds.
+     * Used when a block locks to briefly highlight the area.
+     * 
+     * @param boardRow The row index in the board matrix (0-based, including hidden rows)
+     * @param boardCol The column index in the board matrix (0-based)
+     */
+    public void illuminateArea(int boardRow, int boardCol) {
+        if (boardDisplayManager == null) {
+            return;
+        }
+        
+        Rectangle[][] displayMatrix = boardDisplayManager.getDisplayMatrix();
+        if (displayMatrix == null) {
+            return;
+        }
+        
+        gameEffects.illuminateArea(displayMatrix, boardRow, boardCol, 
+                                  rect -> phantomManager.applyPostIlluminationEffect(rect));
     }
 }

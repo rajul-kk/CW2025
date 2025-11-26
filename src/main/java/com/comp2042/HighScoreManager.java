@@ -8,13 +8,16 @@ import java.util.Scanner;
 
 public class HighScoreManager {
     
+    private static final String PHANTOM_HIGHSCORE_FILE = "highscore_phantom.txt";
     
     /**
      * Loads the high score from the file.
+     * @param isPhantomMode true for phantom mode high score, false for classic mode
      * @return The high score, or 0 if the file doesn't exist or has an error
      */
-    public static int loadHighScore() {
-        File file = new File(GameConstants.HIGHSCORE_FILE);
+    public static int loadHighScore(boolean isPhantomMode) {
+        String filename = isPhantomMode ? PHANTOM_HIGHSCORE_FILE : GameConstants.HIGHSCORE_FILE;
+        File file = new File(filename);
         
         if (!file.exists()) {
             return 0;
@@ -36,17 +39,35 @@ public class HighScoreManager {
     }
     
     /**
+     * Loads the high score from the file (classic mode, for backward compatibility).
+     * @return The high score, or 0 if the file doesn't exist or has an error
+     */
+    public static int loadHighScore() {
+        return loadHighScore(false);
+    }
+    
+    /**
      * Saves the high score to the file, overwriting the old one.
      * @param score The score to save
+     * @param isPhantomMode true for phantom mode high score, false for classic mode
      */
-    public static void saveHighScore(int score) {
-            try (FileWriter writer = new FileWriter(GameConstants.HIGHSCORE_FILE)) {
+    public static void saveHighScore(int score, boolean isPhantomMode) {
+        String filename = isPhantomMode ? PHANTOM_HIGHSCORE_FILE : GameConstants.HIGHSCORE_FILE;
+        try (FileWriter writer = new FileWriter(filename)) {
             writer.write(String.valueOf(score));
         } catch (IOException e) {
             // If saving fails, we can't do much about it
             // In a production app, you might want to log this
             System.err.println("Failed to save high score: " + e.getMessage());
         }
+    }
+    
+    /**
+     * Saves the high score to the file (classic mode, for backward compatibility).
+     * @param score The score to save
+     */
+    public static void saveHighScore(int score) {
+        saveHighScore(score, false);
     }
 }
 

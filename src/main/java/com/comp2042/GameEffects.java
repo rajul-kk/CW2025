@@ -1,11 +1,18 @@
 package com.comp2042;
 
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Handles visual effects and animations for the game UI.
@@ -119,6 +126,119 @@ public class GameEffects {
         }
         
         shakeTimeline.play();
+    }
+    
+    /**
+     * Flashes all visible blocks on the board for 0.2 seconds.
+     * Used when rows are cleared to help the player re-orient themselves.
+     * 
+     * @param displayMatrix The matrix of rectangles representing the game board
+     * @param postFlashEffect Callback to apply after flash completes (e.g., phantom mode fade)
+     */
+    public void flashAllBlocks(Rectangle[][] displayMatrix, Consumer<Rectangle> postFlashEffect) {
+        if (displayMatrix == null) {
+            return;
+        }
+        
+        List<Rectangle> visibleBlocks = new ArrayList<>();
+        
+        // Collect all visible (non-transparent) blocks
+        for (int i = 2; i < displayMatrix.length; i++) {
+            for (int j = 0; j < displayMatrix[i].length; j++) {
+                Rectangle rect = displayMatrix[i][j];
+                if (rect != null) {
+                    Paint fill = rect.getFill();
+                    boolean isVisible = fill != null && fill != Color.TRANSPARENT && 
+                                      !(fill instanceof Color && ((Color) fill).getOpacity() == 0.0);
+                    if (isVisible) {
+                        visibleBlocks.add(rect);
+                    }
+                }
+            }
+        }
+        
+        if (visibleBlocks.isEmpty()) {
+            return;
+        }
+        
+        // Flash effect: quickly fade out and back in
+        // First, make all blocks fully visible
+        for (Rectangle rect : visibleBlocks) {
+            rect.setOpacity(1.0);
+        }
+        
+        // Create fade out transitions for all blocks
+        for (Rectangle rect : visibleBlocks) {
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(100), rect);
+            fadeOut.setFromValue(1.0);
+            fadeOut.setToValue(0.3);
+            fadeOut.setOnFinished(e -> {
+                // Fade back in
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(100), rect);
+                fadeIn.setFromValue(0.3);
+                fadeIn.setToValue(1.0);
+                fadeIn.setOnFinished(e2 -> {
+                    // After flash, apply post-flash effect if provided
+                    if (postFlashEffect != null) {
+                        postFlashEffect.accept(rect);
+                    }
+                });
+                fadeIn.play();
+            });
+            fadeOut.play();
+        }
+    }
+    
+    /**
+     * Illuminates a 2x2 radius around the given position for 0.2 seconds.
+     * Used when a block locks to briefly highlight the area.
+     * 
+     * @param displayMatrix The matrix of rectangles representing the game board
+     * @param boardRow The row index in the board matrix (0-based, including hidden rows)
+     * @param boardCol The column index in the board matrix (0-based)
+     * @param postIlluminationEffect Callback to apply after illumination completes (e.g., phantom mode fade)
+     */
+    public void illuminateArea(Rectangle[][] displayMatrix, int boardRow, int boardCol, 
+                              Consumer<Rectangle> postIlluminationEffect) {
+        if (displayMatrix == null) {
+            return;
+        }
+        
+        List<Rectangle> illuminatedRectangles = new ArrayList<>();
+        int radius = 2;
+        
+        // Illuminate all rectangles in a 2x2 radius (5x5 area total)
+        for (int rowOffset = -radius; rowOffset <= radius; rowOffset++) {
+            for (int colOffset = -radius; colOffset <= radius; colOffset++) {
+                int targetRow = boardRow + rowOffset;
+                int targetCol = boardCol + colOffset;
+                
+                // Check bounds
+                if (targetRow >= 2 && targetRow < displayMatrix.length &&
+                    targetCol >= 0 && targetCol < displayMatrix[targetRow].length) {
+                    Rectangle rect = displayMatrix[targetRow][targetCol];
+                    if (rect != null) {
+                        // Illuminate by setting opacity to 1.0 (fully visible)
+                        rect.setOpacity(1.0);
+                        illuminatedRectangles.add(rect);
+                    }
+                }
+            }
+        }
+        
+        // After 0.2 seconds, revert all illuminated rectangles
+        if (!illuminatedRectangles.isEmpty()) {
+            PauseTransition pause = new PauseTransition(Duration.millis(200));
+            pause.setOnFinished(e -> {
+                for (Rectangle rect : illuminatedRectangles) {
+                    // Apply post-illumination effect if provided
+                    if (postIlluminationEffect != null) {
+                        postIlluminationEffect.accept(rect);
+                    }
+                }
+            });
+            pause.play();
+        }
     }
 }
 

@@ -25,8 +25,8 @@ public class GameController implements InputEventListener {
     public GameController(GuiController c) {
         viewGuiController = c;
         
-        // Load high score from file on startup
-        highScore = HighScoreManager.loadHighScore();
+        // Load high score from file on startup based on current mode
+        highScore = HighScoreManager.loadHighScore(viewGuiController.isPhantomMode());
         viewGuiController.updateHighScore(highScore);
         
         board.createNewBrick();
@@ -52,7 +52,7 @@ public class GameController implements InputEventListener {
         if (currentScore > highScore) {
             highScore = currentScore;
             viewGuiController.updateHighScore(highScore);
-            HighScoreManager.saveHighScore(highScore);
+            HighScoreManager.saveHighScore(highScore, viewGuiController.isPhantomMode());
         }
     }
     
@@ -109,6 +109,9 @@ public class GameController implements InputEventListener {
             
             clearRow = board.clearRows();
             if (clearRow.getLinesRemoved() > 0) {
+                // Flash all blocks to help player re-orient
+                viewGuiController.flashAllBlocks();
+                
                 board.getScore().add(clearRow.getScoreBonus());
                 checkAndUpdateHighScore();
                 
@@ -210,6 +213,10 @@ public class GameController implements InputEventListener {
         canHold = true;
         viewGuiController.drawHoldBlock(null); // Clear hold box
         
+        // Reload high score for current mode
+        highScore = HighScoreManager.loadHighScore(viewGuiController.isPhantomMode());
+        viewGuiController.updateHighScore(highScore);
+        
         // Reset level system
         levelManager.reset();
         updateLevelDisplay();
@@ -283,6 +290,9 @@ public class GameController implements InputEventListener {
         
         ClearRow clearRow = board.clearRows();
         if (clearRow.getLinesRemoved() > 0) {
+            // Flash all blocks to help player re-orient
+            viewGuiController.flashAllBlocks();
+            
             board.getScore().add(clearRow.getScoreBonus());
             checkAndUpdateHighScore();
             // Show the score notification popup

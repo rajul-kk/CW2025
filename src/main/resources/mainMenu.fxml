@@ -3,6 +3,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Pos?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <?import java.net.URL?>
 
 <StackPane fx:controller="com.comp2042.MenuController"
@@ -10,14 +12,27 @@
            alignment="CENTER">
     
     <children>
+        <!-- Background Image -->
+        <ImageView fitWidth="600" fitHeight="560" preserveRatio="true" pickOnBounds="true">
+            <image>
+                <Image url="@Tetris_main_menu.png"/>
+            </image>
+        </ImageView>
+        
         <VBox spacing="30" alignment="CENTER">
+            <padding>
+                <Insets top="150.0"/>
+            </padding>
             <children>
-                <Label fx:id="titleLabel" text="TETRIS" styleClass="arcadeTitle"/>
-                
-                <Button fx:id="startButton" text="Start Game" 
+                <Button fx:id="startButton" text="Classic" 
                         styleClass="controlButton" 
                         prefWidth="200" 
                         onAction="#onStartButtonClick"/>
+                
+                <Button fx:id="phantomButton" text="Phantom" 
+                        styleClass="controlButton" 
+                        prefWidth="200" 
+                        onAction="#onPhantomButtonClick"/>
                 
                 <Button fx:id="exitButton" text="Exit" 
                         styleClass="controlButton" 

@@ -24,6 +24,9 @@ public class MenuController implements Initializable {
     @FXML
     private Button exitButton;
     
+    @FXML
+    private Button phantomButton;
+    
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Apply digital font to title and buttons using FontLoader
@@ -41,6 +44,9 @@ public class MenuController implements Initializable {
             if (exitButton != null) {
                 exitButton.setFont(FontLoader.getFont(18));
             }
+            if (phantomButton != null) {
+                phantomButton.setFont(FontLoader.getFont(18));
+            }
         }
     }
     
@@ -56,6 +62,9 @@ public class MenuController implements Initializable {
             Parent root = fxmlLoader.load();
             GuiController guiController = fxmlLoader.getController();
             
+            // Disable phantom mode for classic mode
+            guiController.setPhantomMode(false);
+            
             // Create and set the game scene
             Scene gameScene = new Scene(root, GameConstants.WINDOW_WIDTH, GameConstants.WINDOW_HEIGHT);
             stage.setScene(gameScene);
@@ -70,6 +79,36 @@ public class MenuController implements Initializable {
             // Set up layout manager for responsive resizing (if needed)
             // LayoutManager layoutManager = new LayoutManager(gameScene);
             // Example: layoutManager.bindWidth(somePane, 0.8);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @FXML
+    private void onPhantomButtonClick(ActionEvent event) {
+        try {
+            // Get the current stage
+            Stage stage = (Stage) phantomButton.getScene().getWindow();
+            
+            // Load the game layout
+            URL location = getClass().getClassLoader().getResource("gameLayout.fxml");
+            FXMLLoader fxmlLoader = new FXMLLoader(location);
+            Parent root = fxmlLoader.load();
+            GuiController guiController = fxmlLoader.getController();
+            
+            // Enable phantom mode
+            guiController.setPhantomMode(true);
+            
+            // Create and set the game scene
+            Scene gameScene = new Scene(root, GameConstants.WINDOW_WIDTH, GameConstants.WINDOW_HEIGHT);
+            stage.setScene(gameScene);
+            
+            // Initialize the game controller
+            GameController gameController = new GameController(guiController);
+            
+            // Set up input handler for keyboard input
+            new InputHandler(gameScene, gameController, guiController);
             
         } catch (Exception e) {
             e.printStackTrace();
