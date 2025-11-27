@@ -502,7 +502,7 @@ public class GuiController implements Initializable {
             return;
         }
         
-        int[][] shape = block.getShape();
+        int[][] shape = block.shape();
         blockRenderer.renderToPane(shape, pane, BlockRenderer.BlockStyle.PREVIEW);
     }
 

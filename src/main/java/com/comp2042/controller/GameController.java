@@ -322,7 +322,6 @@ public class GameController implements InputEventListener {
         if (board.createNewBrick()) {
             // Immediate collision detected - game over, don't draw the colliding block
             viewGuiController.gameOver();
-            return; // Exit early, don't draw the colliding block
         } else {
             // No collision - proceed normally
             rotateBlockQueue();

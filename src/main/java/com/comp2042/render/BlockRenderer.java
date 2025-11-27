@@ -311,7 +311,7 @@ public class BlockRenderer {
             return;
         }
         
-        int[][] shape = block.getShape();
+        int[][] shape = block.shape();
         
         // Render the ghost block
         renderToGridPane(shape, xPos, ghostY, ghostGridPane, ghostNodes, BlockStyle.GHOST);

@@ -2,16 +2,39 @@ package com.comp2042.model;
 
 import com.comp2042.util.MatrixOperations;
 
-public final class Block {
+import java.util.Arrays;
 
-    private final int[][] shape;
-
-    public Block(int[][] shape) {
-        this.shape = MatrixOperations.copy(shape);
+public record Block(int[][] shape) {
+    
+    public Block {
+        shape = MatrixOperations.copy(shape);
     }
-
-    public int[][] getShape() {
+    
+    @Override
+    public int[][] shape() {
         return MatrixOperations.copy(shape);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Block block = (Block) obj;
+        return Arrays.deepEquals(shape, block.shape);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(shape);
+    }
+    
+    @Override
+    public String toString() {
+        return "Block" + Arrays.deepToString(shape);
     }
 }
 

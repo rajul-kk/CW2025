@@ -1,12 +1,15 @@
 package com.comp2042.model;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
 public class HighScoreManager {
+    
+    private HighScoreManager() {
+        // Private constructor to prevent instantiation
+    }
     
     private static final String PHANTOM_HIGHSCORE_FILE = "highscore_phantom.txt";
     
@@ -27,11 +30,8 @@ public class HighScoreManager {
             if (scanner.hasNextInt()) {
                 return scanner.nextInt();
             }
-        } catch (FileNotFoundException e) {
-            // File doesn't exist, return 0
-            return 0;
-        } catch (Exception e) {
-            // Any other error, return 0
+        } catch (Exception _) {
+            // File doesn't exist or any other error, return 0
             return 0;
         }
         
