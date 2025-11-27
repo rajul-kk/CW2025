@@ -54,6 +54,10 @@ public class BoardDisplayManager {
             for (int j = 0; j < boardMatrix[i].length; j++) {
                 Rectangle rectangle = new Rectangle(GameConstants.BRICK_SIZE, GameConstants.BRICK_SIZE);
                 rectangle.setFill(Color.TRANSPARENT);
+                // Add grid lines to show each block position
+                rectangle.setStroke(Color.rgb(100, 100, 100, 0.3)); // Semi-transparent gray grid lines
+                rectangle.setStrokeType(StrokeType.INSIDE);
+                rectangle.setStrokeWidth(0.5);
                 displayMatrix[i][j] = rectangle;
                 gamePanel.add(rectangle, j, i - 2);
             }
@@ -117,7 +121,10 @@ public class BoardDisplayManager {
     private void setRectangleData(int color, Rectangle rectangle) {
         if (color == 0) {
             rectangle.setFill(Color.TRANSPARENT);
-            rectangle.setStroke(null);
+            // Keep grid lines visible even when cell is empty
+            rectangle.setStroke(Color.rgb(100, 100, 100, 0.3));
+            rectangle.setStrokeType(StrokeType.INSIDE);
+            rectangle.setStrokeWidth(0.5);
         } else {
             rectangle.setFill(BlockRenderer.getFillColor(color));
             rectangle.setStroke(BlockRenderer.getBorderColor(color));

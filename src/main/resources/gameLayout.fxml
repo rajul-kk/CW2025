@@ -42,9 +42,9 @@
 
                     </Pane>
 
-                    <Label text="HIGH SCORE" styleClass="nextBrickLabel"/>
+                    <Label text="LEVEL" styleClass="nextBrickLabel"/>
 
-                    <Label fx:id="highScoreLabel" text="0" styleClass="scoreClass"/>
+                    <Label fx:id="levelLabel" text="1" styleClass="scoreClass"/>
 
                     <Label text="LINES" styleClass="nextBrickLabel"/>
 
@@ -128,9 +128,9 @@
 
                     <Label fx:id="scoreLabel" text="000000" styleClass="scoreClass"/>
 
-                    <Label text="LEVEL" styleClass="nextBrickLabel"/>
+                    <Label text="HIGH SCORE" styleClass="nextBrickLabel"/>
 
-                    <Label fx:id="levelLabel" text="1" styleClass="scoreClass"/>
+                    <Label fx:id="highScoreLabel" text="0" styleClass="scoreClass"/>
 
                     <Label text="NEXT " styleClass="nextBrickLabel"/>
 
