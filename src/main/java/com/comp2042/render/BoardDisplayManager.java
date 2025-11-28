@@ -75,40 +75,82 @@ public class BoardDisplayManager {
             return;
         }
         
-        // Collect newly locked block positions for illumination
+        List<int[]> newlyLockedBlocks = processBoardUpdates(board);
+        illuminateNewlyLockedBlocks(newlyLockedBlocks);
+    }
+    
+    /**
+     * Processes board updates and collects positions of newly locked blocks.
+     * 
+     * @param board The current game board state
+     * @return List of positions where blocks were newly locked
+     */
+    private List<int[]> processBoardUpdates(int[][] board) {
         List<int[]> newlyLockedBlocks = new ArrayList<>();
         
         for (int i = 2; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 Rectangle rectangle = displayMatrix[i][j];
-                // Check if rectangle is transitioning from transparent to colored (block just locked)
-                Paint currentFill = rectangle.getFill();
-                boolean wasTransparent = currentFill == null || 
-                                        currentFill == Color.TRANSPARENT ||
-                                        (currentFill instanceof Color && ((Color) currentFill).getOpacity() == 0.0);
-                boolean isNowColored = board[i][j] != 0;
-                
                 setRectangleData(board[i][j], rectangle);
                 
-                // If a block just locked (transparent -> colored)
-                if (wasTransparent && isNowColored) {
-                    // Store the position for illumination
+                if (isNewlyLockedBlock(rectangle, board[i][j])) {
                     newlyLockedBlocks.add(new int[]{i, j});
-                    
-                    // If phantom mode is enabled, fade it after illumination
-                    if (guiController != null) {
-                        // Ensure the rectangle starts fully visible before fading
-                        rectangle.setOpacity(1.0);
-                    }
+                    prepareRectangleForIllumination(rectangle);
                 }
             }
         }
         
-        // Illuminate areas around newly locked blocks
-        if (guiController != null && !newlyLockedBlocks.isEmpty()) {
-            for (int[] position : newlyLockedBlocks) {
-                guiController.illuminateArea(position[0], position[1]);
-            }
+        return newlyLockedBlocks;
+    }
+    
+    /**
+     * Checks if a block was newly locked (transitioned from transparent to colored).
+     * 
+     * @param rectangle The rectangle to check
+     * @param boardValue The current board value at this position
+     * @return true if the block was newly locked, false otherwise
+     */
+    private boolean isNewlyLockedBlock(Rectangle rectangle, int boardValue) {
+        boolean wasTransparent = isTransparent(rectangle.getFill());
+        boolean isNowColored = boardValue != 0;
+        return wasTransparent && isNowColored;
+    }
+    
+    /**
+     * Checks if a paint represents a transparent fill.
+     * 
+     * @param fill The paint to check
+     * @return true if the fill is transparent, false otherwise
+     */
+    private boolean isTransparent(Paint fill) {
+        return fill == null || 
+               fill == Color.TRANSPARENT ||
+               (fill instanceof Color && ((Color) fill).getOpacity() == 0.0);
+    }
+    
+    /**
+     * Prepares a rectangle for illumination effects (e.g., phantom mode fade).
+     * 
+     * @param rectangle The rectangle to prepare
+     */
+    private void prepareRectangleForIllumination(Rectangle rectangle) {
+        if (guiController != null) {
+            rectangle.setOpacity(1.0);
+        }
+    }
+    
+    /**
+     * Illuminates areas around newly locked blocks.
+     * 
+     * @param newlyLockedBlocks List of positions where blocks were newly locked
+     */
+    private void illuminateNewlyLockedBlocks(List<int[]> newlyLockedBlocks) {
+        if (guiController == null || newlyLockedBlocks.isEmpty()) {
+            return;
+        }
+        
+        for (int[] position : newlyLockedBlocks) {
+            guiController.illuminateArea(position[0], position[1]);
         }
     }
     
@@ -125,6 +167,8 @@ public class BoardDisplayManager {
             rectangle.setStroke(Color.rgb(100, 100, 100, 0.3));
             rectangle.setStrokeType(StrokeType.INSIDE);
             rectangle.setStrokeWidth(0.5);
+            // Ensure empty cells remain fully visible so grid lines are always shown
+            rectangle.setOpacity(1.0);
         } else {
             rectangle.setFill(BlockRenderer.getFillColor(color));
             rectangle.setStroke(BlockRenderer.getBorderColor(color));

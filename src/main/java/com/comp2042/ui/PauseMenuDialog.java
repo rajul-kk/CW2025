@@ -136,7 +136,7 @@ public class PauseMenuDialog {
     }
     
     private Button createExitButton() {
-        Button pauseExitButton = new Button("Exit");
+        Button pauseExitButton = new Button("Main Menu");
         pauseExitButton.getStyleClass().add(GameConstants.CSS_PAUSE_MENU_BUTTON);
         pauseExitButton.setOnAction(e -> {
             close();

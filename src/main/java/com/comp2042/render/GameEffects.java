@@ -141,22 +141,7 @@ public class GameEffects {
             return;
         }
         
-        List<Rectangle> visibleBlocks = new ArrayList<>();
-        
-        // Collect all visible (non-transparent) blocks
-        for (int i = 2; i < displayMatrix.length; i++) {
-            for (int j = 0; j < displayMatrix[i].length; j++) {
-                Rectangle rect = displayMatrix[i][j];
-                if (rect != null) {
-                    Paint fill = rect.getFill();
-                    boolean isVisible = fill != null && fill != Color.TRANSPARENT && 
-                                      !(fill instanceof Color && ((Color) fill).getOpacity() == 0.0);
-                    if (isVisible) {
-                        visibleBlocks.add(rect);
-                    }
-                }
-            }
-        }
+        List<Rectangle> visibleBlocks = collectVisibleBlocks(displayMatrix);
         
         if (visibleBlocks.isEmpty()) {
             return;
@@ -170,24 +155,73 @@ public class GameEffects {
         
         // Create fade out transitions for all blocks
         for (Rectangle rect : visibleBlocks) {
-            FadeTransition fadeOut = new FadeTransition(Duration.millis(100), rect);
-            fadeOut.setFromValue(1.0);
-            fadeOut.setToValue(0.3);
-            fadeOut.setOnFinished(e -> {
-                // Fade back in
-                FadeTransition fadeIn = new FadeTransition(Duration.millis(100), rect);
-                fadeIn.setFromValue(0.3);
-                fadeIn.setToValue(1.0);
-                fadeIn.setOnFinished(e2 -> {
-                    // After flash, apply post-flash effect if provided
-                    if (postFlashEffect != null) {
-                        postFlashEffect.accept(rect);
-                    }
-                });
-                fadeIn.play();
-            });
-            fadeOut.play();
+            createFlashAnimation(rect, postFlashEffect);
         }
+    }
+    
+    /**
+     * Collects all visible (non-transparent) blocks from the display matrix.
+     * 
+     * @param displayMatrix The matrix of rectangles representing the game board
+     * @return List of visible rectangles
+     */
+    private List<Rectangle> collectVisibleBlocks(Rectangle[][] displayMatrix) {
+        List<Rectangle> visibleBlocks = new ArrayList<>();
+        
+        for (int i = 2; i < displayMatrix.length; i++) {
+            for (int j = 0; j < displayMatrix[i].length; j++) {
+                Rectangle rect = displayMatrix[i][j];
+                if (rect != null && isBlockVisible(rect)) {
+                    visibleBlocks.add(rect);
+                }
+            }
+        }
+        
+        return visibleBlocks;
+    }
+    
+    /**
+     * Checks if a rectangle represents a visible block (non-transparent).
+     * 
+     * @param rect The rectangle to check
+     * @return true if the block is visible, false otherwise
+     */
+    private boolean isBlockVisible(Rectangle rect) {
+        Paint fill = rect.getFill();
+        return fill != null && fill != Color.TRANSPARENT && 
+               !(fill instanceof Color && ((Color) fill).getOpacity() == 0.0);
+    }
+    
+    /**
+     * Creates a flash animation (fade out then fade in) for a rectangle.
+     * 
+     * @param rect The rectangle to animate
+     * @param postFlashEffect Callback to apply after flash completes
+     */
+    private void createFlashAnimation(Rectangle rect, Consumer<Rectangle> postFlashEffect) {
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(100), rect);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.3);
+        fadeOut.setOnFinished(e -> createFadeInAnimation(rect, postFlashEffect));
+        fadeOut.play();
+    }
+    
+    /**
+     * Creates a fade-in animation and applies post-flash effect when complete.
+     * 
+     * @param rect The rectangle to animate
+     * @param postFlashEffect Callback to apply after flash completes
+     */
+    private void createFadeInAnimation(Rectangle rect, Consumer<Rectangle> postFlashEffect) {
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(100), rect);
+        fadeIn.setFromValue(0.3);
+        fadeIn.setToValue(1.0);
+        fadeIn.setOnFinished(e2 -> {
+            if (postFlashEffect != null) {
+                postFlashEffect.accept(rect);
+            }
+        });
+        fadeIn.play();
     }
     
     /**
@@ -205,40 +239,96 @@ public class GameEffects {
             return;
         }
         
+        List<Rectangle> illuminatedRectangles = collectIlluminatedRectangles(displayMatrix, boardRow, boardCol);
+        
+        if (!illuminatedRectangles.isEmpty()) {
+            schedulePostIlluminationEffect(illuminatedRectangles, postIlluminationEffect);
+        }
+    }
+    
+    /**
+     * Collects all rectangles within the illumination radius around the given position.
+     * 
+     * @param displayMatrix The matrix of rectangles representing the game board
+     * @param boardRow The row index in the board matrix
+     * @param boardCol The column index in the board matrix
+     * @return List of illuminated rectangles
+     */
+    private List<Rectangle> collectIlluminatedRectangles(Rectangle[][] displayMatrix, int boardRow, int boardCol) {
         List<Rectangle> illuminatedRectangles = new ArrayList<>();
         int radius = 2;
         
-        // Illuminate all rectangles in a 2x2 radius (5x5 area total)
         for (int rowOffset = -radius; rowOffset <= radius; rowOffset++) {
             for (int colOffset = -radius; colOffset <= radius; colOffset++) {
                 int targetRow = boardRow + rowOffset;
                 int targetCol = boardCol + colOffset;
                 
-                // Check bounds
-                if (targetRow >= 2 && targetRow < displayMatrix.length &&
-                    targetCol >= 0 && targetCol < displayMatrix[targetRow].length) {
-                    Rectangle rect = displayMatrix[targetRow][targetCol];
-                    if (rect != null) {
-                        // Illuminate by setting opacity to 1.0 (fully visible)
-                        rect.setOpacity(1.0);
-                        illuminatedRectangles.add(rect);
-                    }
+                Rectangle rect = getRectangleAtPosition(displayMatrix, targetRow, targetCol);
+                if (rect != null) {
+                    rect.setOpacity(1.0);
+                    illuminatedRectangles.add(rect);
                 }
             }
         }
         
-        // After 0.2 seconds, revert all illuminated rectangles
-        if (!illuminatedRectangles.isEmpty()) {
-            PauseTransition pause = new PauseTransition(Duration.millis(200));
-            pause.setOnFinished(e -> {
-                for (Rectangle rect : illuminatedRectangles) {
-                    // Apply post-illumination effect if provided
-                    if (postIlluminationEffect != null) {
-                        postIlluminationEffect.accept(rect);
-                    }
-                }
-            });
-            pause.play();
+        return illuminatedRectangles;
+    }
+    
+    /**
+     * Gets a rectangle from the display matrix at the specified position if it's within bounds.
+     * 
+     * @param displayMatrix The matrix of rectangles representing the game board
+     * @param targetRow The target row index
+     * @param targetCol The target column index
+     * @return The rectangle at the position, or null if out of bounds
+     */
+    private Rectangle getRectangleAtPosition(Rectangle[][] displayMatrix, int targetRow, int targetCol) {
+        if (isValidIlluminationPosition(displayMatrix, targetRow, targetCol)) {
+            return displayMatrix[targetRow][targetCol];
+        }
+        return null;
+    }
+    
+    /**
+     * Checks if a position is valid for illumination.
+     * 
+     * @param displayMatrix The matrix of rectangles representing the game board
+     * @param targetRow The target row index
+     * @param targetCol The target column index
+     * @return true if the position is valid, false otherwise
+     */
+    private boolean isValidIlluminationPosition(Rectangle[][] displayMatrix, int targetRow, int targetCol) {
+        return targetRow >= 2 && targetRow < displayMatrix.length &&
+               targetCol >= 0 && targetCol < displayMatrix[targetRow].length;
+    }
+    
+    /**
+     * Schedules the post-illumination effect to be applied after a delay.
+     * 
+     * @param illuminatedRectangles The rectangles that were illuminated
+     * @param postIlluminationEffect Callback to apply after illumination completes
+     */
+    private void schedulePostIlluminationEffect(List<Rectangle> illuminatedRectangles, 
+                                                Consumer<Rectangle> postIlluminationEffect) {
+        PauseTransition pause = new PauseTransition(Duration.millis(200));
+        pause.setOnFinished(e -> applyPostIlluminationEffects(illuminatedRectangles, postIlluminationEffect));
+        pause.play();
+    }
+    
+    /**
+     * Applies post-illumination effects to all illuminated rectangles.
+     * 
+     * @param illuminatedRectangles The rectangles to apply effects to
+     * @param postIlluminationEffect Callback to apply after illumination completes
+     */
+    private void applyPostIlluminationEffects(List<Rectangle> illuminatedRectangles, 
+                                              Consumer<Rectangle> postIlluminationEffect) {
+        if (postIlluminationEffect == null) {
+            return;
+        }
+        
+        for (Rectangle rect : illuminatedRectangles) {
+            postIlluminationEffect.accept(rect);
         }
     }
 }

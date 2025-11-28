@@ -97,16 +97,16 @@ public class PhantomManager {
                 // In phantom mode, fade locked blocks to invisible
                 playPhantomFade(rect);
             } else {
-                // Empty space, make it transparent
-                rect.setOpacity(0.0);
+                // Empty space - keep grid lines visible by maintaining opacity at 1.0
+                rect.setOpacity(1.0);
             }
         } else {
             if (isLockedBlock) {
                 // In classic mode, keep locked blocks fully visible
                 rect.setOpacity(1.0);
             } else {
-                // Empty space, make it transparent
-                rect.setOpacity(0.0);
+                // Empty space - keep grid lines visible by maintaining opacity at 1.0
+                rect.setOpacity(1.0);
             }
         }
     }
