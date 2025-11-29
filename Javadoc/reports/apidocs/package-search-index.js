@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.comp2042.app"},{"l":"com.comp2042.controller"},{"l":"com.comp2042.data"},{"l":"com.comp2042.logic.bricks"},{"l":"com.comp2042.model"},{"l":"com.comp2042.render"},{"l":"com.comp2042.ui"},{"l":"com.comp2042.util"},{"l":"com.comp2042.view"}];updateSearchResults();

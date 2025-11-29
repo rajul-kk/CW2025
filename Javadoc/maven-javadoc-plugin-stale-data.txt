@@ -1,0 +1,60 @@
+-J-Duser.language=
+-J-Duser.country=
+@options
+@packages
+--no-fonts
+-classpath
+'C:/Users/rajul/.m2/repository/org/openjfx/javafx-controls/21.0.6/javafx-controls-21.0.6.jar;C:/Users/rajul/.m2/repository/org/openjfx/javafx-controls/21.0.6/javafx-controls-21.0.6-win.jar;C:/Users/rajul/.m2/repository/org/openjfx/javafx-graphics/21.0.6/javafx-graphics-21.0.6.jar;C:/Users/rajul/.m2/repository/org/openjfx/javafx-graphics/21.0.6/javafx-graphics-21.0.6-win.jar;C:/Users/rajul/.m2/repository/org/openjfx/javafx-base/21.0.6/javafx-base-21.0.6.jar;C:/Users/rajul/.m2/repository/org/openjfx/javafx-base/21.0.6/javafx-base-21.0.6-win.jar;C:/Users/rajul/.m2/repository/org/openjfx/javafx-fxml/21.0.6/javafx-fxml-21.0.6.jar;C:/Users/rajul/.m2/repository/org/openjfx/javafx-fxml/21.0.6/javafx-fxml-21.0.6-win.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'E:/2nd Year DMS Coursework/CW2025Test/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2025. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'E:/2nd Year DMS Coursework/CW2025Test/target/reports/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'demo3 1.0-SNAPSHOT API'
+-use
+-version
+-windowtitle
+'demo3 1.0-SNAPSHOT API'
+com.comp2042.app
+com.comp2042.controller
+com.comp2042.data
+com.comp2042.logic.bricks
+com.comp2042.model
+com.comp2042.render
+com.comp2042.ui
+com.comp2042.util
+com.comp2042.view
+C:\Users\rajul\.m2\repository\org\openjfx\javafx-controls\21.0.6\javafx-controls-21.0.6.jar = 1761734634735
+C:\Users\rajul\.m2\repository\org\openjfx\javafx-controls\21.0.6\javafx-controls-21.0.6-win.jar = 1761734635182
+C:\Users\rajul\.m2\repository\org\openjfx\javafx-graphics\21.0.6\javafx-graphics-21.0.6.jar = 1761734634852
+C:\Users\rajul\.m2\repository\org\openjfx\javafx-graphics\21.0.6\javafx-graphics-21.0.6-win.jar = 1761734635110
+C:\Users\rajul\.m2\repository\org\openjfx\javafx-base\21.0.6\javafx-base-21.0.6.jar = 1761734634845
+C:\Users\rajul\.m2\repository\org\openjfx\javafx-base\21.0.6\javafx-base-21.0.6-win.jar = 1761734634912
+C:\Users\rajul\.m2\repository\org\openjfx\javafx-fxml\21.0.6\javafx-fxml-21.0.6.jar = 1761734634896
+C:\Users\rajul\.m2\repository\org\openjfx\javafx-fxml\21.0.6\javafx-fxml-21.0.6-win.jar = 1761734634965
+E:\2nd Year DMS Coursework\CW2025Test\src\main\java = 1763023959346
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\allclasses-index.html = 1764349188547
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\allpackages-index.html = 1764349188554
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\constant-values.html = 1764349188188
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\element-list = 1764349188082
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\help-doc.html = 1764349188614
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\index-all.html = 1764349188606
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\index.html = 1764349188493
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\member-search-index.js = 1764349188562
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\module-search-index.js = 1764349188557
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\overview-summary.html = 1764349188614
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\overview-tree.html = 1764349188473
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\package-search-index.js = 1764349188558
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\search.html = 1764349188606
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\tag-search-index.js = 1764349188564
+E:\2nd Year DMS Coursework\CW2025Test\target\reports\apidocs\type-search-index.js = 1764349188558

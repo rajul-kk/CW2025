@@ -4,7 +4,28 @@ import javafx.scene.text.Font;
 
 import java.net.URL;
 
-
+/**
+ * Utility class for loading and managing the custom digital font.
+ * 
+ * <p>This class handles loading the {@code digital.ttf} font file from resources
+ * and provides methods to access the font family name and create Font objects
+ * with specific sizes.
+ * 
+ * <p>The font is loaded lazily on first access and cached for subsequent use.
+ * If the font cannot be loaded, the class falls back to the system font.
+ * 
+ * <p>The font loading process:
+ * <ol>
+ *   <li>First attempts to load via InputStream (more reliable for JAR files)</li>
+ *   <li>Falls back to URL-based loading if InputStream fails</li>
+ *   <li>Falls back to system font if both methods fail</li>
+ * </ol>
+ * 
+ * <p>This class cannot be instantiated. All methods are static.
+ * 
+ * @author Rajul Kabir
+ * @version 1.0
+ */
 public class FontLoader {
     
     private static String fontFamilyName = null;

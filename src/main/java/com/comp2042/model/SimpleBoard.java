@@ -10,16 +10,62 @@ import com.comp2042.util.MatrixOperations;
 
 import java.awt.*;
 
+/**
+ * Concrete implementation of the Board interface.
+ * 
+ * <p>This class manages the game board state, including the board matrix,
+ * current falling piece, piece generation, rotation, and row clearing.
+ * It uses a {@link RandomBrickGenerator} for fair piece distribution and
+ * a {@link BrickRotator} for handling piece rotations.
+ * 
+ * <p>The board is represented as a 2D integer array where:
+ * <ul>
+ *   <li>0 represents an empty cell</li>
+ *   <li>1-7 represent different colored locked blocks</li>
+ * </ul>
+ * 
+ * <p>The board includes hidden rows at the top (rows 0-1) to allow pieces
+ * to spawn above the visible area.
+ * 
+ * @author Rajul Kabir
+ * @version 1.0
+ * @see Board
+ * @see RandomBrickGenerator
+ * @see BrickRotator
+ */
 public class SimpleBoard implements Board {
 
+    /** The width of the game board in cells. */
     private final int width;
+    
+    /** The height of the game board in cells (including hidden rows). */
     private final int height;
+    
+    /** The brick generator for creating new pieces. */
     private final BrickGenerator brickGenerator;
+    
+    /** The brick rotator for handling piece rotations. */
     private final BrickRotator brickRotator;
+    
+    /** The current game board matrix (2D array of color codes). */
     private int[][] currentGameMatrix;
+    
+    /** The current position of the falling piece on the board. */
     private Point currentOffset;
+    
+    /** The score object for tracking game score. */
     private final Score score;
 
+    /**
+     * Creates a new SimpleBoard with the specified dimensions.
+     * 
+     * <p>Initializes the board with an empty matrix, creates a new
+     * RandomBrickGenerator for piece generation, and initializes
+     * the score system.
+     * 
+     * @param width The width of the board in cells
+     * @param height The height of the board in cells (including hidden rows)
+     */
     public SimpleBoard(int width, int height) {
         this.width = width;
         this.height = height;
@@ -146,10 +192,26 @@ public class SimpleBoard implements Board {
         return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
     }
 
+    /**
+     * Gets the current brick that is falling.
+     * 
+     * <p>This method is used by the hold system to retrieve the current
+     * piece before swapping it with a held piece.
+     * 
+     * @return The current Brick object
+     */
     public Brick getCurrentBrick() {
         return brickRotator.getCurrentBrick();
     }
 
+    /**
+     * Gets the current rotation state of the falling piece.
+     * 
+     * <p>This method is used by the hold system to preserve the rotation
+     * state when swapping pieces.
+     * 
+     * @return The current rotation index (0-3)
+     */
     public int getCurrentRotation() {
         return brickRotator.getCurrentRotation();
     }

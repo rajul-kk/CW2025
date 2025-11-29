@@ -5,6 +5,27 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
+/**
+ * Utility class for managing high score persistence.
+ * 
+ * <p>This class provides static methods to load and save high scores
+ * for both Classic and Phantom game modes. High scores are stored in
+ * separate files:
+ * <ul>
+ *   <li>Classic mode: {@code highscore.txt}</li>
+ *   <li>Phantom mode: {@code highscore_phantom.txt}</li>
+ * </ul>
+ * 
+ * <p>This class cannot be instantiated. All methods are static and
+ * should be accessed via the class name.
+ * 
+ * <p>If a high score file doesn't exist or cannot be read, the methods
+ * return 0. If saving fails, an error message is printed to stderr
+ * but no exception is thrown.
+ * 
+ * @author Rajul Kabir
+ * @version 1.0
+ */
 public class HighScoreManager {
     
     private HighScoreManager() {

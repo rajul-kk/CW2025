@@ -2,7 +2,23 @@ package com.comp2042.model;
 
 /**
  * Manages level progression and lines cleared tracking for the Tetris game.
- * Handles level calculation based on lines cleared and drop interval calculation.
+ * 
+ * <p>This class handles:
+ * <ul>
+ *   <li>Level calculation based on lines cleared (10 lines per level)</li>
+ *   <li>Drop interval calculation using Modern Tetris Guideline formula</li>
+ *   <li>Tracking total lines cleared across the game</li>
+ * </ul>
+ * 
+ * <p>The drop interval uses the Modern Tetris Guideline formula:
+ * {@code seconds = (0.8 - ((level - 1) * 0.01))^(level - 1)}
+ * 
+ * <p>This provides exponential speed progression, starting slow and
+ * accelerating as levels increase.
+ * 
+ * @author Rajul Kabir
+ * @version 1.0
+ * @see LevelUpdateResult
  */
 public class LevelManager {
     

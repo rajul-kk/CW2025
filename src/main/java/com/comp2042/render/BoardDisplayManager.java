@@ -91,9 +91,15 @@ public class BoardDisplayManager {
         for (int i = 2; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 Rectangle rectangle = displayMatrix[i][j];
+                
+                // Check if block is newly locked BEFORE updating the rectangle
+                // (we need to check the old fill state before setRectangleData changes it)
+                boolean isNewlyLocked = isNewlyLockedBlock(rectangle, board[i][j]);
+                
+                // Update the rectangle's visual properties
                 setRectangleData(board[i][j], rectangle);
                 
-                if (isNewlyLockedBlock(rectangle, board[i][j])) {
+                if (isNewlyLocked) {
                     newlyLockedBlocks.add(new int[]{i, j});
                     prepareRectangleForIllumination(rectangle);
                 }
@@ -156,6 +162,7 @@ public class BoardDisplayManager {
     
     /**
      * Sets the visual properties of a rectangle based on the color code.
+     * Preserves opacity for already-faded blocks in phantom mode.
      * 
      * @param color The color code (0 for transparent, 1-7 for block colors)
      * @param rectangle The rectangle to style
@@ -170,12 +177,22 @@ public class BoardDisplayManager {
             // Ensure empty cells remain fully visible so grid lines are always shown
             rectangle.setOpacity(1.0);
         } else {
+            // Preserve opacity if block is already faded in phantom mode
+            // Only set opacity to 1.0 if it's not already faded (opacity > 0.1)
+            boolean isPhantomMode = guiController != null && guiController.isPhantomMode();
+            boolean isAlreadyFaded = rectangle.getOpacity() < 0.1;
+            
             rectangle.setFill(BlockRenderer.getFillColor(color));
             rectangle.setStroke(BlockRenderer.getBorderColor(color));
             rectangle.setStrokeType(StrokeType.INSIDE);
             rectangle.setStrokeWidth(1.5);
             rectangle.setArcHeight(9);
             rectangle.setArcWidth(9);
+            
+            // Only reset opacity if not in phantom mode or if block hasn't been faded yet
+            if (!isPhantomMode || !isAlreadyFaded) {
+                rectangle.setOpacity(1.0);
+            }
         }
     }
     

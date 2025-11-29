@@ -6,6 +6,28 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 
+/**
+ * Implementation of BrickGenerator using the 7-bag randomizer algorithm.
+ * 
+ * <p>This generator ensures fair piece distribution by using a "bag" system:
+ * <ul>
+ *   <li>Creates a bag containing one of each of the 7 standard Tetris pieces</li>
+ *   <li>Shuffles the bag randomly</li>
+ *   <li>Draws pieces from the bag until empty</li>
+ *   <li>Refills and reshuffles the bag when empty</li>
+ * </ul>
+ * 
+ * <p>This guarantees that every 7 pieces will contain all piece types,
+ * preventing long droughts of specific pieces while maintaining randomness.
+ * 
+ * <p>The generator maintains a queue of future pieces to support peeking
+ * at the next 3 pieces for the preview queue display.
+ * 
+ * @author Rajul Kabir
+ * @version 1.0
+ * @see BrickGenerator
+ * @see Brick
+ */
 public class RandomBrickGenerator implements BrickGenerator {
 
     private final List<Brick> bag;

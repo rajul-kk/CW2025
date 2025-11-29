@@ -2,7 +2,23 @@ package com.comp2042.model;
 
 /**
  * Centralized constants for the Tetris game application.
- * All project-wide constants should be defined here for easy maintenance.
+ * 
+ * <p>This utility class contains all project-wide constants organized into
+ * logical sections:
+ * <ul>
+ *   <li>UI Dimensions - Window and dialog sizes</li>
+ *   <li>Game Board Dimensions - Board size and layout</li>
+ *   <li>Brick/Block Sizes - Visual sizing for game elements</li>
+ *   <li>Animation Timing - Durations for visual effects</li>
+ *   <li>File Names - Resource and data file names</li>
+ *   <li>CSS Classes - Style class names for UI elements</li>
+ * </ul>
+ * 
+ * <p>All constants are public static final and should be accessed directly
+ * via the class name. This class cannot be instantiated.
+ * 
+ * @author Rajul Kabir
+ * @version 1.0
  */
 public final class GameConstants {
     
