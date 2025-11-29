@@ -1,6 +1,7 @@
 package com.comp2042.view;
 
 import com.comp2042.util.FontLoader;
+import com.comp2042.util.MusicManager;
 import com.comp2042.model.GameConstants;
 import com.comp2042.controller.GameController;
 import com.comp2042.controller.InputHandler;
@@ -31,8 +32,13 @@ public class MenuController implements Initializable {
     @FXML
     private Button phantomButton;
     
+    private final MusicManager musicManager = MusicManager.getInstance();
+    
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Play menu music when menu opens
+        musicManager.playMenuMusic();
+        
         // Apply digital font to title and buttons using FontLoader
         String fontFamily = FontLoader.getFontFamily();
         if (fontFamily != null && !fontFamily.equals("System")) {
@@ -57,6 +63,9 @@ public class MenuController implements Initializable {
     @FXML
     private void onStartButtonClick(ActionEvent event) {
         try {
+            // Stop menu music before starting game
+            musicManager.stopMusic();
+            
             // Get the current stage
             Stage stage = (Stage) startButton.getScene().getWindow();
             
@@ -80,6 +89,9 @@ public class MenuController implements Initializable {
             // The InputHandler constructor automatically sets up key listeners
             new InputHandler(gameScene, gameController, guiController);
             
+            // Play classic mode music
+            musicManager.playClassicMusic();
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -88,6 +100,9 @@ public class MenuController implements Initializable {
     @FXML
     private void onPhantomButtonClick(ActionEvent event) {
         try {
+            // Stop menu music before starting game
+            musicManager.stopMusic();
+            
             // Get the current stage
             Stage stage = (Stage) phantomButton.getScene().getWindow();
             
@@ -109,6 +124,9 @@ public class MenuController implements Initializable {
             
             // Set up input handler for keyboard input
             new InputHandler(gameScene, gameController, guiController);
+            
+            // Play phantom mode music
+            musicManager.playPhantomMusic();
             
         } catch (Exception e) {
             e.printStackTrace();

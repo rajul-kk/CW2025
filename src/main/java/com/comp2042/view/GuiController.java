@@ -19,6 +19,7 @@ import com.comp2042.ui.NotificationPanel;
 import com.comp2042.ui.PauseMenuDialog;
 import com.comp2042.util.ClearRow;
 import com.comp2042.util.FontLoader;
+import com.comp2042.util.MusicManager;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -114,6 +115,8 @@ public class GuiController implements Initializable {
     private java.util.List<javafx.scene.Node> currentFallingBlockNodes = new java.util.ArrayList<>();
     
     private final PhantomManager phantomManager = new PhantomManager();
+    
+    private final MusicManager musicManager = MusicManager.getInstance();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -391,11 +394,12 @@ public class GuiController implements Initializable {
         boolean currentlyPaused = isPause.get();
         
         if (currentlyPaused) {
-            // Resume the game
+            // Resume the game (volume restoration handled in resumeGame())
             resumeGame();
         } else {
             // Pause the game
             doPause();
+            musicManager.lowerVolumeForPause();
         }
     }
     
@@ -414,6 +418,8 @@ public class GuiController implements Initializable {
         }
         closePauseMenu();
         gamePanel.requestFocus();
+        // Restore music volume to normal when resuming
+        musicManager.restoreVolumeFromPause();
     }
     
     private void showPauseMenu() {
@@ -479,6 +485,9 @@ public class GuiController implements Initializable {
             timeLine.stop();
         }
         
+        // Stop game music
+        musicManager.stopMusic();
+        
         // Close pause menu if open
         closePauseMenu();
         
@@ -487,6 +496,8 @@ public class GuiController implements Initializable {
             // Fallback to exit if menu loading fails
             SceneManager.handleTransitionError();
         }
+        
+        // Menu music will be played when MenuController initializes
     }
 
     /**
@@ -556,11 +567,19 @@ public class GuiController implements Initializable {
     /**
      * Sets whether phantom mode is enabled.
      * In phantom mode, blocks fade to near-invisibility after locking.
+     * Also switches music based on the mode.
      * 
      * @param enabled true to enable phantom mode, false to disable
      */
     public void setPhantomMode(boolean enabled) {
         phantomManager.setPhantomMode(enabled);
+        
+        // Switch music based on mode
+        if (enabled) {
+            musicManager.playPhantomMusic();
+        } else {
+            musicManager.playClassicMusic();
+        }
     }
 
     /**
