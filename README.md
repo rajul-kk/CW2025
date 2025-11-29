@@ -196,9 +196,6 @@ The following features found in modern Tetris games (e.g., Tetris Guideline) wer
 8. **Replay System**
    - **Why not implemented**: Recording and replaying games would require saving all game events and states, which would add significant complexity and storage requirements.
 
-9. **Sound Effects and Music**
-   - **Why not implemented**: Audio was not included in the project requirements. Adding sound would require audio libraries and asset management.
-
 ---
 
 ## New Java Classes
@@ -242,32 +239,55 @@ The following classes were newly created for this assignment:
    - Location: `src/main/java/com/comp2042/model/GameConstants.java`
    - Description: Contains all project-wide constants including UI dimensions, animation timing, CSS class names, file names, and game board dimensions. Organized into logical sections for easy maintenance.
 
-8. **`RandomBrickGenerator`** (`com.comp2042.logic.bricks`)
-   - Purpose: Implements 7-bag randomizer for fair piece distribution
-   - Location: `src/main/java/com/comp2042/logic/bricks/RandomBrickGenerator.java`
-   - Description: Ensures every 7 pieces contains one of each piece type. Maintains a queue for peeking at next pieces.
-
 ### User Interface
-9. **`PauseMenuDialog`** (`com.comp2042.ui`)
+8. **`PauseMenuDialog`** (`com.comp2042.ui`)
    - Purpose: Manages the pause menu dialog
    - Location: `src/main/java/com/comp2042/ui/PauseMenuDialog.java`
    - Description: Creates and manages a modal pause menu with options to resume, start new game, show controls, or exit. Decouples pause menu UI from the main controller.
 
-10. **`ControlsDialog`** (`com.comp2042.ui`)
+9. **`ControlsDialog`** (`com.comp2042.ui`)
     - Purpose: Manages the controls dialog showing all keyboard shortcuts
     - Location: `src/main/java/com/comp2042/ui/ControlsDialog.java`
     - Description: Displays organized list of game controls grouped by category. Modal dialog accessible from pause menu.
 
+10. **`LayoutManager`** (`com.comp2042.ui`)
+    - Purpose: Handles responsive resizing and layout binding for the game UI
+    - Location: `src/main/java/com/comp2042/ui/LayoutManager.java`
+    - Description: Decouples layout management from the GUI controller by providing methods to bind pane dimensions to scene size with optional scaling factors.
+
+### View
+11. **`MenuController`** (`com.comp2042.view`)
+    - Purpose: Manages the main menu and game mode selection
+    - Location: `src/main/java/com/comp2042/view/MenuController.java`
+    - Description: Handles main menu initialization, button actions for starting classic/phantom games, and music playback coordination. Integrates with MusicManager for menu and game mode music.
+
+### Controller
+12. **`InputHandler`** (`com.comp2042.controller`)
+    - Purpose: Handles keyboard input for the game
+    - Location: `src/main/java/com/comp2042/controller/InputHandler.java`
+    - Description: Decouples input handling from the GUI controller by processing keyboard events and routing them to appropriate game actions (movement, rotation, hold, hard drop, pause). Implements cooldown system for hard drop to prevent spam.
+
+13. **`SceneManager`** (`com.comp2042.controller`)
+    - Purpose: Manages scene navigation and stage transitions for the application
+    - Location: `src/main/java/com/comp2042/controller/SceneManager.java`
+    - Description: Handles loading FXML files and switching between scenes (main menu, game scene). Provides utility methods for getting Stage from nodes and handling scene transition errors.
+
 ### Application
-11. **`Launcher`** (`com.comp2042.app`)
+14. **`Launcher`** (`com.comp2042.app`)
     - Purpose: Entry point for the JavaFX application
     - Location: `src/main/java/com/comp2042/app/Launcher.java`
     - Description: Launches the JavaFX application by calling `Application.launch()` with the Main class.
 
-12. **`DownData`** (`com.comp2042.app`)
-    - Purpose: Data transfer object for down event results
-    - Location: `src/main/java/com/comp2042/app/DownData.java`
-    - Description: Carries information about line clears and view data when a piece moves down.
+### Utilities
+15. **`FontLoader`** (`com.comp2042.util`)
+    - Purpose: Utility class for loading and managing the custom digital font
+    - Location: `src/main/java/com/comp2042/util/FontLoader.java`
+    - Description: Handles loading the digital.ttf font file from resources with fallback mechanisms (InputStream, URL-based, system font). Provides methods to access font family name and create Font objects with specific sizes. Font is loaded lazily and cached.
+
+16. **`MusicManager`** (`com.comp2042.util`)
+    - Purpose: Manages background music playback for the game
+    - Location: `src/main/java/com/comp2042/util/MusicManager.java`
+    - Description: Handles menu music and game mode-specific music (classic and phantom modes) with proper volume control, pause/resume functionality, and resource cleanup. Uses singleton pattern for centralized music management.
 
 ---
 
@@ -276,7 +296,12 @@ The following classes were newly created for this assignment:
 The following classes from the original codebase were modified to add new functionality:
 
 ### Controllers
-1. **`GameController`** (`com.comp2042.controller`)
+1. **`InputEventListener`** (`com.comp2042.controller`)
+   - **Changes Made**:
+     - Added `onHoldEvent()` method for hold/swap functionality
+   - **Why Modified**: Interface needed to be extended to support the new hold feature that allows players to store and swap pieces.
+
+2. **`GameController`** (`com.comp2042.controller`)
    - **Changes Made**:
      - Added hold/swap functionality with `heldBrick` and `canHold` fields
      - Implemented ghost piece calculation with `calculateGhostY()` method
@@ -288,7 +313,7 @@ The following classes from the original codebase were modified to add new functi
      - Added `onHoldEvent()` for hold/swap mechanics
    - **Why Modified**: Core game logic needed to support new features like hold, ghost piece, levels, and enhanced scoring.
 
-2. **`GuiController`** (`com.comp2042.view`)
+3. **`GuiController`** (`com.comp2042.view`)
    - **Changes Made**:
      - Integrated `BoardDisplayManager` for board rendering
      - Added `GameEffects` for animations
@@ -299,7 +324,8 @@ The following classes from the original codebase were modified to add new functi
      - Added pause menu and controls dialog management
      - Implemented phantom mode toggle
      - Added methods for visual effects (shake, flash, illuminate, lock pulse)
-   - **Why Modified**: UI controller needed to coordinate all visual elements, animations, and new UI components.
+     - Integrated `MusicManager` for background music with volume control during pause and automatic mode-based music switching
+   - **Why Modified**: UI controller needed to coordinate all visual elements, animations, new UI components, and background music management.
 
 ### Model
 3. **`SimpleBoard`** (`com.comp2042.model`)
@@ -316,6 +342,47 @@ The following classes from the original codebase were modified to add new functi
      - Added `getThirdNextBrickData()` method
      - Added `setBrick(Brick brick, int rotation)` method
    - **Why Modified**: Interface needed to be extended to support new features like next piece queue and hold functionality.
+
+### Logic
+5. **`RandomBrickGenerator`** (`com.comp2042.logic.bricks`)
+   - **Changes Made**:
+     - Implemented 7-bag randomizer algorithm for fair piece distribution
+     - Added queue system for peeking at next pieces (supports preview queue display)
+     - Ensures every 7 pieces contains one of each piece type
+   - **Why Modified**: Original random generation was replaced with 7-bag system to ensure fair distribution and support next piece preview functionality.
+
+### Utilities
+6. **`ClearRow`** (`com.comp2042.util`)
+   - **Changes Made**:
+     - Added `getScoreBonus()` method to return score bonus earned for clearing rows
+     - Score bonus calculated as 50 × (lines cleared)²
+   - **Why Modified**: Enhanced scoring system needed to track and return bonus points earned from line clears for display and notification purposes.
+
+### User Interface
+7. **`GameOverPanel`** (`com.comp2042.ui`)
+   - **Changes Made**:
+     - Added VBox layout with padding and spacing for better organization
+     - Added "New Game" button with customizable action handler
+     - Added `setOnNewGameAction()` method for button event handling
+     - Improved styling and layout management
+   - **Why Modified**: Game over screen needed to be enhanced with a new game button and better layout structure, decoupled from the main GUI controller for better code organization.
+
+8. **`NotificationPanel`** (`com.comp2042.ui`)
+   - **Changes Made**:
+     - Added `centerOverGameBoard()` method for positioning notifications over the game board
+     - Improved animation timing and effects
+     - Enhanced layout and positioning logic
+   - **Why Modified**: Notification panel needed better positioning relative to the game board and improved visual presentation for score notifications.
+
+### Application
+8. **`Main`** (`com.comp2042.app`)
+   - **Changes Made**:
+     - Changed from loading game layout directly to loading main menu (`mainMenu.fxml`)
+     - Added `FontLoader.loadFont()` call to load custom digital font before UI initialization
+     - Updated window title to use `GameConstants.APP_TITLE`
+     - Updated window dimensions to use `GameConstants.WINDOW_WIDTH` and `GameConstants.WINDOW_HEIGHT`
+     - Removed direct game controller initialization (now handled through menu)
+   - **Why Modified**: Application entry point needed to display main menu first instead of starting game directly, and required font loading before any UI elements are created.
 
 ---
 
@@ -346,40 +413,30 @@ The following classes from the original codebase were modified to add new functi
 
 **Solution**: Created `HighScoreManager` with separate file handling for each mode (`highscore.txt` and `highscore_phantom.txt`). Added proper file I/O with error handling and file existence checks.
 
-### 6. Animation Performance Issues
-**Problem**: Multiple simultaneous animations (lock pulse, flash, shake) caused frame rate drops and visual stuttering.
-
-**Solution**: Optimized animations by using JavaFX's built-in animation classes efficiently, ensuring animations don't overlap unnecessarily, and using parallel transitions where appropriate. Also limited the number of simultaneous animations.
-
-### 7. Board Display Matrix Synchronization
+### 6. Board Display Matrix Synchronization
 **Problem**: The display matrix (Rectangle[][]) would sometimes get out of sync with the game board matrix, causing visual artifacts.
 
 **Solution**: Implemented `BoardDisplayManager` to centralize all display matrix operations. Added proper initialization and refresh methods that ensure the display matrix always matches the game board state.
 
-### 8. Next Piece Queue Display
-**Problem**: The next piece queue would show incorrect pieces or not update when pieces were consumed.
-
-**Solution**: Implemented a proper queue rotation system in `GameController.rotateBlockQueue()` that tracks the relationship between the board's brick generator and the displayed preview blocks. The queue is properly maintained when pieces are consumed.
-
-### 9. Hard Drop Cooldown
+### 7. Hard Drop Cooldown
 **Problem**: Players could spam hard drop, causing multiple rapid drops and potential game state issues.
 
 **Solution**: Implemented a cooldown system using timestamps to prevent hard drop from being triggered too frequently (300ms cooldown). This prevents accidental double-drops and maintains game flow.
 
-### 10. FXML Resource Loading
-**Problem**: FXML files sometimes failed to load, especially when running from JAR files, due to incorrect resource paths.
-
-**Solution**: Used `getClass().getClassLoader().getResource()` for consistent resource loading that works both in development and in packaged JAR files. Ensured all resource paths are relative to the resources directory.
-
-### 11. Digital Font Loading Issues
+### 8. Digital Font Loading Issues
 **Problem**: The custom digital font (`digital.ttf`) was not loading correctly when the application started. The font would fail to load when using direct URL paths, especially in different execution environments (IDE vs JAR file). This caused the UI to fall back to system fonts, breaking the retro aesthetic design.
 
 **Solution**: Created `FontLoader` utility class that uses `getResourceAsStream()` to load the font via InputStream (more reliable for JAR files), with a fallback to URL-based loading. It caches the loaded font family name and provides helper methods for easy access. The font is loaded early in the application lifecycle (in `Main.start()`) before any UI elements are created, ensuring the font is available when needed.
 
-### 12. Grid Lines Disappearing When Blocks Lock
+### 9. Grid Lines Disappearing When Blocks Lock
 **Problem**: Grid lines disappeared when blocks locked, especially in phantom mode. Visual effects were setting empty cells' opacity to 0.0, making the grid invisible.
 
 **Solution**: Modified `PhantomManager.applyPostIlluminationEffect()` and `BoardDisplayManager.setRectangleData()` to maintain opacity at 1.0 for empty cells, ensuring grid lines remain visible in both Classic and Phantom modes.
+
+### 10. Music Not Restarting on New Game
+**Problem**: When starting a new game from the pause menu, the background music would continue playing from its current position instead of restarting from the beginning.
+
+**Solution**: Added music restart logic to the `newGame()` method in `GuiController` that restores volume to normal and restarts the appropriate music track (classic or phantom mode) from the beginning when a new game is started.
 
 ---
 

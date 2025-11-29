@@ -1,7 +1,6 @@
-package com.comp2042.app;
+package com.comp2042.data;
 
 import com.comp2042.util.ClearRow;
-import com.comp2042.data.ViewData;
 
 /**
  * Data transfer object that encapsulates the result of a down movement event.

@@ -1,6 +1,6 @@
 package com.comp2042.view;
 
-import com.comp2042.app.DownData;
+import com.comp2042.data.DownData;
 import com.comp2042.controller.GameController;
 import com.comp2042.controller.InputEventListener;
 import com.comp2042.controller.SceneManager;
@@ -379,6 +379,14 @@ public class GuiController implements Initializable {
         timeLine.play();
         isPause.setValue(Boolean.FALSE);
         isGameOver.setValue(Boolean.FALSE);
+        
+        // Restart music based on current game mode
+        musicManager.restoreVolumeFromPause(); // Restore volume in case it was lowered
+        if (isPhantomMode()) {
+            musicManager.playPhantomMusic();
+        } else {
+            musicManager.playClassicMusic();
+        }
     }
 
     @FXML

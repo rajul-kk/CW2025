@@ -1,6 +1,6 @@
 package com.comp2042.controller;
 
-import com.comp2042.app.DownData;
+import com.comp2042.data.DownData;
 import com.comp2042.data.EventSource;
 import com.comp2042.data.MoveEvent;
 import com.comp2042.data.ViewData;
