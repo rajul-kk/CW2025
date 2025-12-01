@@ -50,7 +50,12 @@ public interface Board {
     /**
      * Attempts to rotate the current piece counter-clockwise.
      * 
-     * @return true if the rotation was successful, false if the piece cannot rotate (collision)
+     * <p>If rotation at the current position would cause a collision, the method
+     * will attempt wall kicks by shifting the piece left or right (up to 2 cells)
+     * to find a valid rotation position.
+     * 
+     * @return true if the rotation was successful (with or without wall kicks), 
+     *         false if the piece cannot rotate at any valid position
      */
     boolean rotateLeftBrick();
 

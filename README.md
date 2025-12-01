@@ -114,44 +114,49 @@ All dependencies are automatically managed by Maven and specified in `pom.xml`:
     - Creates a challenging gameplay experience
     - Separate high score tracking for phantom mode
 
+10. **Wall Kicks**
+    - Basic wall kick system allows rotation at board edges
+    - Automatically shifts piece left or right (up to 2 cells) when rotation would cause collision
+    - Enables more flexible piece placement near walls
+
 ### Visual Effects and Animations
-10. **Lock Pulse Animation**
+11. **Lock Pulse Animation**
     - Blocks pulse when they lock into place
     - Scale animation provides visual feedback
 
-11. **Board Shake Effect**
+12. **Board Shake Effect**
     - Screen shakes when a piece hard drops
     - Adds impact and excitement to the gameplay
 
-12. **Flash Effect**
+13. **Flash Effect**
     - All blocks flash when rows are cleared
     - Helps player re-orient after line clears
 
-13. **Illumination Effect**
+14. **Illumination Effect**
     - Area around newly locked blocks briefly illuminates
     - 2x2 radius highlight effect
 
 ### User Interface
-14. **Main Menu**
+15. **Main Menu**
     - Start game option
     - Game mode selection (Classic/Phantom)
     - Exit option
 
-15. **Pause Menu**
+16. **Pause Menu**
     - Press ESC to pause/resume
     - Options: Resume, New Game, Controls, Exit
     - Modal dialog that pauses game state
 
-16. **Controls Dialog**
+17. **Controls Dialog**
     - Displays all keyboard controls
     - Accessible from pause menu
     - Organized by category (Movement, Game Controls, Menu Shortcuts)
 
-17. **Game Over Screen**
+18. **Game Over Screen**
     - Displays when game ends
     - Options to start new game or exit
 
-18. **Visual Polish**
+19. **Visual Polish**
     - Custom digital font for retro aesthetic
     - Gradient-filled blocks with borders
     - Grid lines on game board
@@ -173,7 +178,7 @@ The following features have been implemented but are not functioning correctly o
 The following features found in modern Tetris games (e.g., Tetris Guideline) were not implemented:
 
 1. **Super Rotation System (SRS)**
-   - **Why not implemented**: The game uses a basic rotation system without wall kicks or floor kicks. SRS requires complex collision detection and multiple rotation attempts, which would require significant refactoring of the rotation logic.
+   - **Partial Implementation**: The game now includes basic wall kicks that allow rotation at edges by automatically shifting the piece left or right (up to 2 cells) to find a valid position. However, this is not full SRS - it lacks piece-specific kick tables, rotation-state-specific kicks, and floor kicks. Full SRS would require complex collision detection with multiple rotation attempts and specific offset tables for each piece type.
 
 2. **T-Spin Detection and Scoring**
    - **Why not implemented**: T-spin detection requires analyzing the board state after rotation to determine if a T-piece is in a "spin" position. This feature was deemed non-essential for core gameplay and would require additional scoring logic and UI indicators.

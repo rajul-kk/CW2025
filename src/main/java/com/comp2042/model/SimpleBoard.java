@@ -122,13 +122,51 @@ public class SimpleBoard implements Board {
     public boolean rotateLeftBrick() {
         int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
         NextShapeInfo nextShape = brickRotator.getNextShape();
-        boolean conflict = MatrixOperations.intersect(currentMatrix, nextShape.getShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
-        if (conflict) {
-            return false;
-        } else {
+        int currentX = (int) currentOffset.getX();
+        int currentY = (int) currentOffset.getY();
+        
+        // Try rotation at current position first
+        boolean conflict = MatrixOperations.intersect(currentMatrix, nextShape.getShape(), currentX, currentY);
+        if (!conflict) {
             brickRotator.setCurrentShape(nextShape.getPosition());
             return true;
         }
+        
+        // Wall kick: try shifting left and right to find a valid position
+        // Try left by 1
+        conflict = MatrixOperations.intersect(currentMatrix, nextShape.getShape(), currentX - 1, currentY);
+        if (!conflict) {
+            currentOffset.translate(-1, 0);
+            brickRotator.setCurrentShape(nextShape.getPosition());
+            return true;
+        }
+        
+        // Try right by 1
+        conflict = MatrixOperations.intersect(currentMatrix, nextShape.getShape(), currentX + 1, currentY);
+        if (!conflict) {
+            currentOffset.translate(1, 0);
+            brickRotator.setCurrentShape(nextShape.getPosition());
+            return true;
+        }
+        
+        // Try left by 2
+        conflict = MatrixOperations.intersect(currentMatrix, nextShape.getShape(), currentX - 2, currentY);
+        if (!conflict) {
+            currentOffset.translate(-2, 0);
+            brickRotator.setCurrentShape(nextShape.getPosition());
+            return true;
+        }
+        
+        // Try right by 2
+        conflict = MatrixOperations.intersect(currentMatrix, nextShape.getShape(), currentX + 2, currentY);
+        if (!conflict) {
+            currentOffset.translate(2, 0);
+            brickRotator.setCurrentShape(nextShape.getPosition());
+            return true;
+        }
+        
+        // All attempts failed - rotation not possible
+        return false;
     }
 
     @Override
