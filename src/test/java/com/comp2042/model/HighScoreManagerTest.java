@@ -1,5 +1,6 @@
 package com.comp2042.model;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -14,17 +15,30 @@ import java.nio.file.Path;
  * Unit tests for HighScoreManager class.
  * 
  * Tests high score loading and saving for both Classic and Phantom modes.
+ * 
+ * Note: These tests modify the actual high score files. Original values are
+ * saved before tests and restored after to prevent test interference.
  */
 class HighScoreManagerTest {
 
     @TempDir
     Path tempDir;
 
+    private int originalClassicScore;
+    private int originalPhantomScore;
+
     @BeforeEach
     void setUp() {
-        // Note: These tests work with the actual file system
-        // The HighScoreManager uses hardcoded file names, so we test the actual behavior
-        // Files are accessed directly via HighScoreManager methods
+        // Save original high scores before tests modify them
+        originalClassicScore = HighScoreManager.loadHighScore(false);
+        originalPhantomScore = HighScoreManager.loadHighScore(true);
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Restore original high scores after tests
+        HighScoreManager.saveHighScore(originalClassicScore, false);
+        HighScoreManager.saveHighScore(originalPhantomScore, true);
     }
 
     @Test
