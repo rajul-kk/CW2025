@@ -10,6 +10,29 @@ import com.comp2042.util.ClearRow;
 import com.comp2042.util.MatrixOperations;
 import com.comp2042.view.GuiController;
 
+/**
+ * Main game logic controller that handles game state and player input.
+ * 
+ * <p>This class serves as the core game controller, managing:
+ * <ul>
+ *   <li>Game board state and piece movement</li>
+ *   <li>Input event handling (movement, rotation, hold)</li>
+ *   <li>Row clearing and scoring</li>
+ *   <li>Level progression and speed management</li>
+ *   <li>High score tracking</li>
+ *   <li>Game over detection</li>
+ * </ul>
+ * 
+ * <p>This controller implements {@link InputEventListener} to receive input
+ * events from the input handler and coordinates with the view controller
+ * to update the UI.
+ * 
+ * @author Rajul Kabir
+ * @version 1.0
+ * @see com.comp2042.view.GuiController
+ * @see com.comp2042.controller.InputEventListener
+ * @see com.comp2042.model.SimpleBoard
+ */
 public class GameController implements InputEventListener {
 
     private Board board = new SimpleBoard(GameConstants.BOARD_HEIGHT, GameConstants.BOARD_WIDTH);

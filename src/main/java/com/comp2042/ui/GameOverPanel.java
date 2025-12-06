@@ -8,7 +8,20 @@ import javafx.scene.layout.VBox;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
 
-
+/**
+ * Panel displayed when the game ends.
+ * 
+ * <p>This class creates a game over screen that appears when the player
+ * can no longer place pieces. It displays a "GAME OVER" message and provides
+ * a button to start a new game.
+ * 
+ * <p>The panel is styled to match the game's visual theme and can be
+ * configured with an action handler for the new game button.
+ * 
+ * @author Rajul Kabir
+ * @version 1.0
+ * @see javafx.scene.layout.BorderPane
+ */
 public class GameOverPanel extends BorderPane {
 
     private Button newGameButton;

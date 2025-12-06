@@ -18,6 +18,26 @@ import javafx.stage.Stage;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the main menu screen.
+ * 
+ * <p>This class manages the main menu interface, including navigation to the
+ * game screen and application exit. It handles:
+ * <ul>
+ *   <li>Displaying the main menu UI</li>
+ *   <li>Starting the game in Classic or Phantom mode</li>
+ *   <li>Managing menu music playback</li>
+ *   <li>Applying custom fonts to menu elements</li>
+ * </ul>
+ * 
+ * <p>This controller is initialized via FXML and implements {@link Initializable}
+ * to set up the menu when the scene is loaded.
+ * 
+ * @author Rajul Kabir
+ * @version 1.0
+ * @see com.comp2042.app.Main
+ * @see com.comp2042.view.GuiController
+ */
 public class MenuController implements Initializable {
     
     @FXML

@@ -166,7 +166,6 @@ All dependencies are automatically managed by Maven and specified in `pom.xml`:
 
 ## Implemented but Not Working Properly
 
-The following features have been implemented but are not functioning correctly or have known issues:
 
 *(No features currently listed in this category - all implemented features are working as expected.)*
 
@@ -178,7 +177,7 @@ The following features have been implemented but are not functioning correctly o
 The following features found in modern Tetris games (e.g., Tetris Guideline) were not implemented:
 
 1. **Super Rotation System (SRS)**
-   - **Partial Implementation**: The game now includes basic wall kicks that allow rotation at edges by automatically shifting the piece left or right (up to 2 cells) to find a valid position. However, this is not full SRS - it lacks piece-specific kick tables, rotation-state-specific kicks, and floor kicks. Full SRS would require complex collision detection with multiple rotation attempts and specific offset tables for each piece type.
+   - **Partial Implementation**: Basic wall kicks allow rotation at edges by shifting pieces left/right (up to 2 cells). Full SRS would require piece-specific kick tables, rotation-state-specific kicks, and floor kicks with complex collision detection.
 
 2. **T-Spin Detection and Scoring**
    - **Why not implemented**: T-spin detection requires analyzing the board state after rotation to determine if a T-piece is in a "spin" position. This feature was deemed non-essential for core gameplay and would require additional scoring logic and UI indicators.
@@ -189,16 +188,10 @@ The following features found in modern Tetris games (e.g., Tetris Guideline) wer
 4. **All-Clear Bonus**
    - **Why not implemented**: Detecting when the entire board is cleared would require checking the board state after every line clear. This feature was considered a nice-to-have rather than essential.
 
-5. **Lock Delay and Lock Reset**
-   - **Why not implemented**: Modern Tetris includes a delay before a piece locks, allowing players to make last-second adjustments. This would require implementing a timer system and modifying the lock detection logic.
-
-6. **Infinite Spin Prevention**
+5. **Infinite Spin Prevention**
    - **Why not implemented**: The current system allows pieces to rotate in place if there's space. Modern Tetris prevents infinite spinning by limiting rotations in the same position.
 
-7. **Multiplayer Support**
-   - **Why not implemented**: Multiplayer would require network programming, game state synchronization, and significant architectural changes. This was beyond the scope of a single-player Tetris implementation.
-
-8. **Replay System**
+6. **Replay System**
    - **Why not implemented**: Recording and replaying games would require saving all game events and states, which would add significant complexity and storage requirements.
 
 ---
@@ -318,6 +311,7 @@ The following classes from the original codebase were modified to add new functi
      - Added `onHoldEvent()` for hold/swap mechanics
    - **Why Modified**: Core game logic needed to support new features like hold, ghost piece, levels, and enhanced scoring.
 
+### View
 3. **`GuiController`** (`com.comp2042.view`)
    - **Changes Made**:
      - Integrated `BoardDisplayManager` for board rendering
@@ -333,7 +327,7 @@ The following classes from the original codebase were modified to add new functi
    - **Why Modified**: UI controller needed to coordinate all visual elements, animations, new UI components, and background music management.
 
 ### Model
-3. **`SimpleBoard`** (`com.comp2042.model`)
+4. **`SimpleBoard`** (`com.comp2042.model`)
    - **Changes Made**:
      - Added `getSecondNextBrickData()` and `getThirdNextBrickData()` methods for next piece queue
      - Added `setBrick()` method to support hold/swap functionality
@@ -341,7 +335,7 @@ The following classes from the original codebase were modified to add new functi
      - Modified to use `RandomBrickGenerator` instead of basic random generation
    - **Why Modified**: Board needed to support preview queue and hold functionality, requiring access to brick generator's peek methods and ability to set specific bricks.
 
-4. **`Board`** (Interface) (`com.comp2042.model`)
+5. **`Board`** (Interface) (`com.comp2042.model`)
    - **Changes Made**:
      - Added `getSecondNextBrickData()` method
      - Added `getThirdNextBrickData()` method
@@ -349,7 +343,7 @@ The following classes from the original codebase were modified to add new functi
    - **Why Modified**: Interface needed to be extended to support new features like next piece queue and hold functionality.
 
 ### Logic
-5. **`RandomBrickGenerator`** (`com.comp2042.logic.bricks`)
+6. **`RandomBrickGenerator`** (`com.comp2042.logic.bricks`)
    - **Changes Made**:
      - Implemented 7-bag randomizer algorithm for fair piece distribution
      - Added queue system for peeking at next pieces (supports preview queue display)
@@ -357,14 +351,14 @@ The following classes from the original codebase were modified to add new functi
    - **Why Modified**: Original random generation was replaced with 7-bag system to ensure fair distribution and support next piece preview functionality.
 
 ### Utilities
-6. **`ClearRow`** (`com.comp2042.util`)
+7. **`ClearRow`** (`com.comp2042.util`)
    - **Changes Made**:
      - Added `getScoreBonus()` method to return score bonus earned for clearing rows
      - Score bonus calculated as 50 × (lines cleared)²
    - **Why Modified**: Enhanced scoring system needed to track and return bonus points earned from line clears for display and notification purposes.
 
 ### User Interface
-7. **`GameOverPanel`** (`com.comp2042.ui`)
+8. **`GameOverPanel`** (`com.comp2042.ui`)
    - **Changes Made**:
      - Added VBox layout with padding and spacing for better organization
      - Added "New Game" button with customizable action handler
@@ -372,7 +366,7 @@ The following classes from the original codebase were modified to add new functi
      - Improved styling and layout management
    - **Why Modified**: Game over screen needed to be enhanced with a new game button and better layout structure, decoupled from the main GUI controller for better code organization.
 
-8. **`NotificationPanel`** (`com.comp2042.ui`)
+9. **`NotificationPanel`** (`com.comp2042.ui`)
    - **Changes Made**:
      - Added `centerOverGameBoard()` method for positioning notifications over the game board
      - Improved animation timing and effects
@@ -380,7 +374,7 @@ The following classes from the original codebase were modified to add new functi
    - **Why Modified**: Notification panel needed better positioning relative to the game board and improved visual presentation for score notifications.
 
 ### Application
-8. **`Main`** (`com.comp2042.app`)
+10. **`Main`** (`com.comp2042.app`)
    - **Changes Made**:
      - Changed from loading game layout directly to loading main menu (`mainMenu.fxml`)
      - Added `FontLoader.loadFont()` call to load custom digital font before UI initialization
@@ -429,9 +423,9 @@ The following classes from the original codebase were modified to add new functi
 **Solution**: Implemented a cooldown system using timestamps to prevent hard drop from being triggered too frequently (300ms cooldown). This prevents accidental double-drops and maintains game flow.
 
 ### 8. Digital Font Loading Issues
-**Problem**: The custom digital font (`digital.ttf`) was not loading correctly when the application started. The font would fail to load when using direct URL paths, especially in different execution environments (IDE vs JAR file). This caused the UI to fall back to system fonts, breaking the retro aesthetic design.
+**Problem**: The custom digital font (`digital.ttf`) failed to load using direct URL paths, especially in JAR files, causing the UI to fall back to system fonts.
 
-**Solution**: Created `FontLoader` utility class that uses `getResourceAsStream()` to load the font via InputStream (more reliable for JAR files), with a fallback to URL-based loading. It caches the loaded font family name and provides helper methods for easy access. The font is loaded early in the application lifecycle (in `Main.start()`) before any UI elements are created, ensuring the font is available when needed.
+**Solution**: Created `FontLoader` utility class that uses `getResourceAsStream()` for reliable JAR loading, with URL fallback. The font is loaded early in `Main.start()` before UI creation.
 
 ### 9. Grid Lines Disappearing When Blocks Lock
 **Problem**: Grid lines disappeared when blocks locked, especially in phantom mode. Visual effects were setting empty cells' opacity to 0.0, making the grid invisible.

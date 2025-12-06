@@ -18,6 +18,20 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
+/**
+ * Animated panel that displays score notifications when rows are cleared.
+ * 
+ * <p>This class creates a visual notification that appears over the game board
+ * when rows are cleared, showing the score bonus earned. The notification
+ * fades out and moves upward before being removed from the scene.
+ * 
+ * <p>The panel is positioned centered over the game board and uses animations
+ * to provide visual feedback to the player.
+ * 
+ * @author Rajul Kabir
+ * @version 1.0
+ * @see javafx.scene.layout.BorderPane
+ */
 public class NotificationPanel extends BorderPane {
 
     public NotificationPanel(String text) {

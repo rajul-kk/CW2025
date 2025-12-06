@@ -6,6 +6,24 @@ import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class providing matrix operations for the game board.
+ * 
+ * <p>This class contains static methods for performing operations on 2D integer
+ * arrays representing the game board and piece matrices. It provides:
+ * <ul>
+ *   <li>Collision detection between pieces and the board</li>
+ *   <li>Matrix copying and merging operations</li>
+ *   <li>Row clearing detection and board updates</li>
+ *   <li>Deep copying of matrix lists</li>
+ * </ul>
+ * 
+ * <p>This class cannot be instantiated. All methods are static and should be
+ * accessed via the class name.
+ * 
+ * @author Rajul Kabir
+ * @version 1.0
+ */
 public class MatrixOperations {
 
 

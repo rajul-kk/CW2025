@@ -43,6 +43,28 @@ import javafx.util.Duration;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Main view controller for the Tetris game interface.
+ * 
+ * <p>This class manages the game's user interface, coordinating between the game
+ * controller and the visual representation. It handles:
+ * <ul>
+ *   <li>Rendering the game board and falling blocks</li>
+ *   <li>Displaying score, level, lines, and high score</li>
+ *   <li>Managing game state (pause, game over)</li>
+ *   <li>Handling UI interactions and animations</li>
+ *   <li>Coordinating with dialogs (pause menu, controls)</li>
+ * </ul>
+ * 
+ * <p>This controller is initialized via FXML and implements {@link Initializable}
+ * to set up the game view when the scene is loaded.
+ * 
+ * @author Rajul Kabir
+ * @version 1.0
+ * @see com.comp2042.controller.GameController
+ * @see com.comp2042.ui.PauseMenuDialog
+ * @see com.comp2042.ui.ControlsDialog
+ */
 public class GuiController implements Initializable {
 
 
